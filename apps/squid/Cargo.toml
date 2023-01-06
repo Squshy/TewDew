@@ -6,10 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rocket = "0.5.0-rc.2"
+
 [dependencies.sqlx]
 version = "0.5.7"
 default-features = false
 features = [
+    "runtime-tokio-rustls",
     "macros",
     "postgres",
     "uuid",
