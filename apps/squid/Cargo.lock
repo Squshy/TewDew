@@ -1654,6 +1654,7 @@ name = "squid"
 version = "0.1.0"
 dependencies = [
  "rocket",
+ "serde",
  "sqlx",
  "uuid",
 ]
