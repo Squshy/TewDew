@@ -1753,6 +1753,7 @@ dependencies = [
  "rocket",
  "serde 1.0.152",
  "sqlx",
+ "tokio",
  "uuid",
 ]
 
