@@ -16,6 +16,7 @@ uuid = { version = "0.8.1", features = ["v4"] }
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 config = "0.11"
+juniper = "0.10"
 
 [dependencies.sqlx]
 version = "0.5.7"
