@@ -1,12 +1,6 @@
-use juniper::{Context, GraphQLInputObject, GraphQLObject};
-use juniper::{EmptySubscription, FieldResult, RootNode};
-use sqlx::PgPool;
-
-pub struct MyContext {
-    pub db_pool: PgPool,
-}
-
-impl Context for MyContext {}
+use crate::schema::{MutationRoot, MyContext, QueryRoot};
+use juniper::FieldResult;
+use juniper::{GraphQLInputObject, GraphQLObject};
 
 // The #[graphql(description = "")] seems to be equivalent to doc comments
 // However you can overwrite a comment for GraphQL by using the #[graphql]
@@ -28,8 +22,6 @@ struct NewUser {
     password: String,
 }
 
-pub struct QueryRoot;
-
 #[juniper::graphql_object(context = MyContext)]
 impl QueryRoot {
     async fn user(
@@ -45,7 +37,7 @@ impl QueryRoot {
     }
 }
 
-pub struct MutationRoot;
+// MUTATIONS
 #[juniper::graphql_object(context = MyContext)]
 impl MutationRoot {
     fn create_user(new_user: NewUser) -> FieldResult<User> {
@@ -55,10 +47,4 @@ impl MutationRoot {
             password: new_user.password,
         })
     }
-}
-
-pub type Schema = RootNode<'static, QueryRoot, MutationRoot, EmptySubscription<MyContext>>;
-
-pub fn create_schema() -> Schema {
-    Schema::new(QueryRoot {}, MutationRoot {}, EmptySubscription::new())
 }
