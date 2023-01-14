@@ -1,4 +1,8 @@
 use crate::schema::{MutationRoot, MyContext, QueryRoot};
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
+    Argon2,
+};
 use juniper::FieldResult;
 use juniper::{GraphQLInputObject, GraphQLObject};
 use uuid::Uuid;
@@ -14,6 +18,7 @@ struct User {
     /// The user's username
     username: String,
     /// The users's password
+    #[graphql(skip)]
     password: String,
 }
 
@@ -46,10 +51,22 @@ impl QueryRoot {
 #[juniper::graphql_object(context = MyContext)]
 impl MutationRoot {
     fn create_user(new_user: NewUser) -> FieldResult<User> {
+        let password_hash = hash_password(&new_user.password)?;
+
         Ok(User {
             id: Uuid::new_v4().to_owned(),
             username: new_user.username,
-            password: new_user.password,
+            password: password_hash,
         })
     }
+}
+
+fn hash_password(password: &String) -> Result<String, argon2::password_hash::Error> {
+    let password_as_bytes: Vec<u8> = password.bytes().collect();
+    let salt = SaltString::generate(&mut OsRng);
+    let password_hash = Argon2::default()
+        .hash_password(&password_as_bytes, &salt)?
+        .to_string();
+
+    Ok(password_hash)
 }
