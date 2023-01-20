@@ -37,14 +37,20 @@ enum UserError {
     NotFound,
     #[error("User already exists")]
     AlreadyExists,
+    #[error("Invalid username or password")]
+    InvalidUsernameOrPassword,
 }
 
-impl UserError {
-    fn into_service_error(self) -> ServiceError {
+impl juniper::IntoFieldError for UserError {
+    fn into_field_error(self) -> juniper::FieldError {
         match self {
-            UserError::NotFound => ServiceError::BadRequest("User not found.".to_string()),
+            UserError::NotFound => ServiceError::BadRequest("User not found.".to_string()).into(),
             UserError::AlreadyExists => {
                 ServiceError::BadRequest("User with that username already exists.".to_string())
+                    .into()
+            }
+            UserError::InvalidUsernameOrPassword => {
+                ServiceError::BadRequest("Invalid username or password.".to_string()).into()
             }
         }
     }
@@ -61,7 +67,7 @@ impl QueryRoot {
         )
         .fetch_one(&context.db_pool)
         .await
-        .map_err(|_| UserError::NotFound.into_service_error())?;
+        .map_err(|_| UserError::NotFound)?;
 
         Ok(user)
     }
@@ -84,7 +90,7 @@ impl MutationRoot {
         )
         .fetch_one(&context.db_pool)
         .await
-        .map_err(|_| UserError::AlreadyExists.into_service_error())?;
+        .map_err(|_| UserError::AlreadyExists)?;
 
         Ok(User {
             id: user.id,
@@ -101,7 +107,7 @@ impl MutationRoot {
         let user = sqlx::query_as!(User, "SELECT * FROM users WHERE username = $1", &username,)
             .fetch_one(&context.db_pool)
             .await
-            .map_err(|_e| ServiceError::BadRequest("Invalid username or password.".to_string()))?;
+            .map_err(|_| UserError::InvalidUsernameOrPassword)?;
 
         verify_password(&password, &user.password)?;
 
@@ -109,14 +115,10 @@ impl MutationRoot {
     }
 }
 
-fn verify_password(password: &String, user_password: &String) -> ServiceResult<Option<bool>> {
+fn verify_password(password: &String, user_password: &String) -> Result<Option<bool>, UserError> {
     let parsed_hash = match PasswordHash::new(&user_password) {
         Ok(password_hash) => password_hash,
-        Err(_e) => {
-            return Err(ServiceError::BadRequest(
-                "Invalid username or password".to_string(),
-            ))
-        }
+        Err(_) => return Err(UserError::InvalidUsernameOrPassword),
     };
 
     let password_bytes: Vec<u8> = password.clone().into_bytes();
@@ -125,9 +127,7 @@ fn verify_password(password: &String, user_password: &String) -> ServiceResult<O
         .is_ok();
 
     if !is_oki_doki {
-        return Err(ServiceError::BadRequest(
-            "Invalid username or password.".to_string(),
-        ));
+        return Err(UserError::InvalidUsernameOrPassword);
     }
 
     Ok(None)
