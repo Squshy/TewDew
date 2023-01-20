@@ -1,35 +1,14 @@
 use crate::errors::{ServiceError, ServiceResult};
 use crate::schema::{MutationRoot, MyContext, QueryRoot};
+use crate::user::model::{NewUser, User};
 use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
 use juniper::FieldResult;
-use juniper::{GraphQLInputObject, GraphQLObject};
 use serde::Serialize;
 use thiserror::Error;
 use uuid::Uuid;
-
-// The #[graphql(description = "")] seems to be equivalent to doc comments
-// However you can overwrite a comment for GraphQL by using the #[graphql]
-// and the doc comments will still appear in Rust documentation
-#[derive(GraphQLObject)]
-#[graphql(description = "Information about a user")]
-struct User {
-    #[graphql(description = "The ID of the user")]
-    id: Uuid,
-    /// The user's username
-    username: String,
-    /// The users's password
-    #[graphql(skip)]
-    password: String,
-}
-
-#[derive(GraphQLInputObject)]
-struct NewUser {
-    username: String,
-    password: String,
-}
 
 #[derive(Debug, Error, Serialize)]
 enum UserError {
