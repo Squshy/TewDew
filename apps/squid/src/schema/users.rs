@@ -1,10 +1,13 @@
+use crate::errors::{ServiceError, ServiceResult};
 use crate::schema::{MutationRoot, MyContext, QueryRoot};
 use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
-use juniper::{graphql_value, FieldResult};
+use juniper::FieldResult;
 use juniper::{GraphQLInputObject, GraphQLObject};
+use serde::Serialize;
+use thiserror::Error;
 use uuid::Uuid;
 
 // The #[graphql(description = "")] seems to be equivalent to doc comments
@@ -28,28 +31,21 @@ struct NewUser {
     password: String,
 }
 
+#[derive(Debug, Error, Serialize)]
 enum UserError {
+    #[error("User not found")]
     NotFound,
-    InvalidUsernameOrPassword,
+    #[error("User already exists")]
+    AlreadyExists,
 }
 
-impl<S: juniper::ScalarValue> juniper::IntoFieldError<S> for UserError {
-    fn into_field_error(self) -> juniper::FieldError<S> {
+impl UserError {
+    fn into_service_error(self) -> ServiceError {
         match self {
-            UserError::NotFound => juniper::FieldError::new("User not found", juniper::Value::Null),
-            UserError::InvalidUsernameOrPassword => {
-                juniper::FieldError::new("Invalid username or password", juniper::Value::Null)
+            UserError::NotFound => ServiceError::BadRequest("User not found.".to_string()),
+            UserError::AlreadyExists => {
+                ServiceError::BadRequest("User with that username already exists.".to_string())
             }
-        }
-    }
-}
-
-impl std::fmt::Display for UserError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        // Gotta be better way than duplicating
-        match self {
-            UserError::NotFound => write!(f, "User not found"),
-            UserError::InvalidUsernameOrPassword => write!(f, "Invalid username or password"),
         }
     }
 }
@@ -65,7 +61,7 @@ impl QueryRoot {
         )
         .fetch_one(&context.db_pool)
         .await
-        .map_err(|_e| UserError::NotFound)?;
+        .map_err(|_| UserError::NotFound.into_service_error())?;
 
         Ok(user)
     }
@@ -87,7 +83,8 @@ impl MutationRoot {
             &password_hash
         )
         .fetch_one(&context.db_pool)
-        .await?;
+        .await
+        .map_err(|_| UserError::AlreadyExists.into_service_error())?;
 
         Ok(User {
             id: user.id,
@@ -104,7 +101,7 @@ impl MutationRoot {
         let user = sqlx::query_as!(User, "SELECT * FROM users WHERE username = $1", &username,)
             .fetch_one(&context.db_pool)
             .await
-            .map_err(|_e| UserError::InvalidUsernameOrPassword)?;
+            .map_err(|_e| ServiceError::BadRequest("Invalid username or password.".to_string()))?;
 
         verify_password(&password, &user.password)?;
 
@@ -112,10 +109,14 @@ impl MutationRoot {
     }
 }
 
-fn verify_password(password: &String, user_password: &String) -> Result<Option<bool>, UserError> {
+fn verify_password(password: &String, user_password: &String) -> ServiceResult<Option<bool>> {
     let parsed_hash = match PasswordHash::new(&user_password) {
         Ok(password_hash) => password_hash,
-        Err(_e) => return Err(UserError::InvalidUsernameOrPassword),
+        Err(_e) => {
+            return Err(ServiceError::BadRequest(
+                "Invalid username or password".to_string(),
+            ))
+        }
     };
 
     let password_bytes: Vec<u8> = password.clone().into_bytes();
@@ -124,17 +125,20 @@ fn verify_password(password: &String, user_password: &String) -> Result<Option<b
         .is_ok();
 
     if !is_oki_doki {
-        return Err(UserError::InvalidUsernameOrPassword);
+        return Err(ServiceError::BadRequest(
+            "Invalid username or password.".to_string(),
+        ));
     }
 
     Ok(None)
 }
 
-fn hash_password(password: &String) -> Result<String, argon2::password_hash::Error> {
+fn hash_password(password: &String) -> ServiceResult<String> {
     let password_as_bytes: Vec<u8> = password.bytes().collect();
     let salt = SaltString::generate(&mut OsRng);
     let password_hash = Argon2::default()
-        .hash_password(&password_as_bytes, &salt)?
+        .hash_password(&password_as_bytes, &salt)
+        .map_err(|_| ServiceError::InternalServerError)?
         .to_string();
 
     Ok(password_hash)
