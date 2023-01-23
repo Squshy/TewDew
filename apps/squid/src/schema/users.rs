@@ -1,39 +1,13 @@
 use crate::errors::{ServiceError, ServiceResult};
 use crate::schema::{MutationRoot, MyContext, QueryRoot};
-use crate::user::model::{NewUser, User};
+use crate::user::errors::UserError;
+use crate::user::models::{NewUser, User};
 use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
 use juniper::FieldResult;
-use serde::Serialize;
-use thiserror::Error;
 use uuid::Uuid;
-
-#[derive(Debug, Error, Serialize)]
-enum UserError {
-    #[error("User not found")]
-    NotFound,
-    #[error("User already exists")]
-    AlreadyExists,
-    #[error("Invalid username or password")]
-    InvalidUsernameOrPassword,
-}
-
-impl juniper::IntoFieldError for UserError {
-    fn into_field_error(self) -> juniper::FieldError {
-        match self {
-            UserError::NotFound => ServiceError::BadRequest("User not found.".to_string()).into(),
-            UserError::AlreadyExists => {
-                ServiceError::BadRequest("User with that username already exists.".to_string())
-                    .into()
-            }
-            UserError::InvalidUsernameOrPassword => {
-                ServiceError::BadRequest("Invalid username or password.".to_string()).into()
-            }
-        }
-    }
-}
 
 #[juniper::graphql_object(context = MyContext)]
 impl QueryRoot {
