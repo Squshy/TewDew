@@ -5,13 +5,10 @@ use argon2::{
     Argon2,
 };
 
-pub fn verify_password(
-    password: &String,
-    user_password: &String,
-) -> Result<Option<bool>, UserError> {
+pub fn verify_password(password: &String, user_password: &String) -> ServiceResult<Option<bool>> {
     let parsed_hash = match PasswordHash::new(&user_password) {
         Ok(password_hash) => password_hash,
-        Err(_) => return Err(UserError::InvalidUsernameOrPassword),
+        Err(_) => return Err(UserError::InvalidUsernameOrPassword)?,
     };
 
     let password_bytes: Vec<u8> = password.clone().into_bytes();
@@ -20,7 +17,7 @@ pub fn verify_password(
         .is_ok();
 
     if !is_oki_doki {
-        return Err(UserError::InvalidUsernameOrPassword);
+        return Err(UserError::InvalidUsernameOrPassword)?;
     }
 
     Ok(None)

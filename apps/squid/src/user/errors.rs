@@ -12,16 +12,15 @@ pub enum UserError {
     InvalidUsernameOrPassword,
 }
 
-impl juniper::IntoFieldError for UserError {
-    fn into_field_error(self) -> juniper::FieldError {
-        match self {
-            UserError::NotFound => ServiceError::BadRequest("User not found.".to_string()).into(),
+impl From<UserError> for ServiceError {
+    fn from(error: UserError) -> ServiceError {
+        match error {
+            UserError::NotFound => ServiceError::BadRequest("User not found.".to_string()),
             UserError::AlreadyExists => {
                 ServiceError::BadRequest("User with that username already exists.".to_string())
-                    .into()
             }
             UserError::InvalidUsernameOrPassword => {
-                ServiceError::BadRequest("Invalid username or password.".to_string()).into()
+                ServiceError::BadRequest("Invalid username or password.".to_string())
             }
         }
     }
