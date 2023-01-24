@@ -8,7 +8,7 @@ pub enum ServiceError {
     #[error("Internal Service Error")]
     InternalServerError,
 
-    #[error("Bad Request: {0}")]
+    #[error("{0}")]
     BadRequest(String),
 
     #[error("Unauthorized")]
