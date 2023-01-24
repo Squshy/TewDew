@@ -11,7 +11,7 @@ pub async fn get_by_username(pool: &PgPool, username: &String) -> FieldResult<Us
     let user = sqlx::query_as!(User, "SELECT * FROM users WHERE username = $1", &username,)
         .fetch_one(pool)
         .await
-        .map_err(|_| UserError::InvalidUsernameOrPassword)?;
+        .map_err(|_| UserError::NotFound)?;
 
     Ok(user)
 }
