@@ -16,10 +16,10 @@ uuid = { version = "0.8.1", features = ["v4", "serde"] }
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 config = "0.11"
-juniper = "0.15.0"
-juniper_rocket = "0.8.0"
 argon2 = "0.4.1"
 thiserror = "1.0.38"
+async-graphql = "5.0.5"
+async-graphql-rocket = "5.0.5"
 
 [dependencies.sqlx]
 version = "0.5.7"
