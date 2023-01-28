@@ -1,23 +1,17 @@
-use juniper::{GraphQLInputObject, GraphQLObject};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-// The #[graphql(description = "")] seems to be equivalent to doc comments
-// However you can overwrite a comment for GraphQL by using the #[graphql]
-// and the doc comments will still appear in Rust documentation
-#[derive(Debug, Serialize, Deserialize, GraphQLObject)]
-#[graphql(description = "Information about a user")]
+#[derive(async_graphql::SimpleObject, Debug, Serialize, Deserialize)]
 pub struct User {
-    #[graphql(description = "The ID of the user")]
+    /// The user's id
     pub id: Uuid,
     /// The user's username
     pub username: String,
     /// The users's password
-    #[graphql(skip)]
     pub password: String,
 }
 
-#[derive(Debug, GraphQLInputObject)]
+#[derive(Debug, async_graphql::InputObject)]
 pub struct NewUser {
     /// The user's username
     pub username: String,

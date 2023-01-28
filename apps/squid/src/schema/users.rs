@@ -1,28 +1,41 @@
-use crate::schema::{Context, MutationRoot, QueryRoot};
+use crate::errors::ServiceResult;
+use crate::schema::{MutationRoot, QueryRoot};
 use crate::user::models::{NewUser, User};
 use crate::user::services::{create, get_by_username, login};
-use juniper::FieldResult;
+use async_graphql::{Context, Object};
 
-#[juniper::graphql_object(Context = Context)]
+#[Object]
 impl QueryRoot {
-    async fn user(context: &Context, username: String) -> FieldResult<User> {
-        let user = get_by_username(&context.db_pool, &username).await?;
+    async fn user<'ctx>(&self, ctx: &Context<'ctx>, username: String) -> ServiceResult<User> {
+        let pool = &ctx.data::<sqlx::PgPool>().unwrap();
+        let user = get_by_username(&pool, &username).await?;
 
         Ok(user)
     }
 }
 
 // MUTATIONS
-#[juniper::graphql_object(Context = Context)]
+#[Object]
 impl MutationRoot {
-    async fn create_user(context: &Context, new_user: NewUser) -> FieldResult<User> {
-        let user = create(&context.db_pool, &new_user).await?;
+    async fn create_user<'ctx>(
+        &self,
+        ctx: &Context<'ctx>,
+        new_user: NewUser,
+    ) -> ServiceResult<User> {
+        let pool = &ctx.data::<sqlx::PgPool>().unwrap();
+        let user = create(&pool, &new_user).await?;
 
         Ok(user)
     }
 
-    async fn login(context: &Context, username: String, password: String) -> FieldResult<User> {
-        let user = login(&context.db_pool, &username, &password).await?;
+    async fn login<'ctx>(
+        &self,
+        ctx: &Context<'ctx>,
+        username: String,
+        password: String,
+    ) -> ServiceResult<User> {
+        let pool = &ctx.data::<sqlx::PgPool>().unwrap();
+        let user = login(&pool, &username, &password).await?;
 
         Ok(user)
     }

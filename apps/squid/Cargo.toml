@@ -18,7 +18,7 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 config = "0.11"
 argon2 = "0.4.1"
 thiserror = "1.0.38"
-async-graphql = "5.0.5"
+async-graphql = { version = "5.0.5", features = ["uuid", "uuid08"] }
 async-graphql-rocket = "5.0.5"
 
 [dependencies.sqlx]

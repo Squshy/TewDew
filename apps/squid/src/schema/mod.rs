@@ -1,6 +1,6 @@
 mod users;
 
-use juniper::{EmptySubscription, RootNode};
+use async_graphql::{EmptySubscription, Schema as GraphQLSchema};
 use sqlx::PgPool;
 pub use users::*;
 
@@ -8,8 +8,6 @@ pub use users::*;
 pub struct Context {
     pub db_pool: PgPool,
 }
-
-impl juniper::Context for Context {}
 
 impl Context {
     pub fn new(pool: PgPool) -> Self {
@@ -20,8 +18,10 @@ impl Context {
 pub struct QueryRoot;
 pub struct MutationRoot;
 
-pub type Schema = RootNode<'static, QueryRoot, MutationRoot, EmptySubscription<Context>>;
+pub type Schema = GraphQLSchema<QueryRoot, MutationRoot, EmptySubscription>;
 
-pub fn create_schema() -> Schema {
-    Schema::new(QueryRoot {}, MutationRoot {}, EmptySubscription::new())
+pub fn create_schema(context: Context) -> Schema {
+    Schema::build(QueryRoot, MutationRoot, EmptySubscription)
+        .data(context.db_pool)
+        .finish()
 }
