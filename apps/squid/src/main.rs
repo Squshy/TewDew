@@ -1,35 +1,46 @@
-use async_graphql::http::GraphiQLSource;
-use async_graphql_rocket::{GraphQLQuery, GraphQLRequest, GraphQLResponse};
-use rocket::{response::content, routes, State};
+use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer};
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use sqlx::PgPool;
 use squid::configuration::get_configuration;
+use squid::errors::{ServiceError, ServiceResult};
 use squid::schema::{create_schema, Context, Schema};
 
-#[rocket::get("/")]
-fn graphiql() -> content::RawHtml<String> {
-    content::RawHtml(GraphiQLSource::build().endpoint("/graphql").finish())
+async fn index_playground() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(playground_source(
+            GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"),
+        ))
 }
 
-#[rocket::get("/graphql?<query>")]
-async fn graphql_query(
-    // context: &State<Context>,
-    query: GraphQLQuery,
-    schema: &State<Schema>,
+fn hehe(http_req: HttpRequest) -> ServiceResult<Option<String>> {
+    let tee_hee = http_req.headers().get("Authorization");
+
+    match tee_hee {
+        Some(val) => {
+            let h = val
+                .to_str()
+                .map_err(|_| ServiceError::InternalServerError)?;
+            Ok(Some(h.to_string()))
+        }
+        None => Ok(None),
+    }
+}
+
+async fn meme(
+    schema: web::Data<Schema>,
+    http_req: HttpRequest,
+    req: GraphQLRequest,
 ) -> GraphQLResponse {
-    query.execute(schema.inner()).await
+    let mut query = req.into_inner();
+    let meme = hehe(http_req);
+    query = query.data(meme);
+    schema.execute(query).await.into()
 }
 
-#[rocket::post("/graphql", data = "<request>", format = "application/json")]
-async fn graphql_request(
-    // context: &State<Context>,
-    request: GraphQLRequest,
-    schema: &State<Schema>,
-) -> GraphQLResponse {
-    request.execute(schema.inner()).await
-}
-
-#[rocket::main]
-async fn main() -> Result<(), rocket::Error> {
+#[tokio::main]
+async fn main() -> std::io::Result<()> {
     let configuration = get_configuration().expect("Failed to read configuration.");
     let connection_pool = PgPool::connect(&configuration.database.connection_string())
         .await
@@ -37,16 +48,15 @@ async fn main() -> Result<(), rocket::Error> {
     let context = Context {
         db_pool: connection_pool.clone(),
     };
-    let schema = create_schema(context.clone());
+    let schema = web::Data::new(create_schema(context));
 
-    let figment = rocket::Config::figment().merge(("port", configuration.application_port));
-
-    let _rocket = rocket::custom(figment)
-        .manage(context)
-        .manage(schema)
-        .mount("/", routes![graphiql, graphql_query, graphql_request])
-        .launch()
-        .await?;
-
-    Ok(())
+    HttpServer::new(move || {
+        App::new()
+            .app_data(schema.clone())
+            .route("/", web::post().to(meme))
+            .route("/", web::get().to(index_playground))
+    })
+    .bind("0.0.0.0:4000")?
+    .run()
+    .await
 }

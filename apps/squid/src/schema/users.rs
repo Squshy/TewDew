@@ -8,6 +8,20 @@ use async_graphql::{Context, Object};
 impl QueryRoot {
     async fn user<'ctx>(&self, ctx: &Context<'ctx>, username: String) -> ServiceResult<User> {
         let pool = &ctx.data::<sqlx::PgPool>().unwrap();
+
+        let hehe = ctx.data_opt::<ServiceResult<Option<String>>>();
+        let text = match hehe {
+            Some(val) => match val {
+                Ok(t) => match t {
+                    Some(h) => h.to_owned(),
+                    None => "NO H".to_string(),
+                },
+                Err(_) => "ERR".to_string(),
+            },
+            None => "NONE".to_string(),
+        };
+
+        println!("text: {}", text);
         let user = get_by_username(&pool, &username).await?;
 
         Ok(user)
