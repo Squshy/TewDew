@@ -2,6 +2,7 @@
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application_port: u16,
+    pub auth_duration_in_hours: u16,
 }
 
 #[derive(serde::Deserialize)]

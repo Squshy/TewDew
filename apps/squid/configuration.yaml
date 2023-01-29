@@ -1,4 +1,5 @@
 application_port: 4000
+auth_duration_in_hours: 24
 database:
   host: "127.0.0.1"
   port: 5432

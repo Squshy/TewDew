@@ -20,6 +20,9 @@ argon2 = "0.4.1"
 thiserror = "1.0.38"
 async-graphql = { version = "5.0.5", features = ["uuid", "uuid08"] }
 async-graphql-actix-web = "5.0.5"
+chrono = "0.4.15"
+jsonwebtoken = "7"
+async-trait = "0.1.63"
 
 [dependencies.sqlx]
 version = "0.5.7"
