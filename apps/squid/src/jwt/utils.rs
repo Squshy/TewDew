@@ -1,4 +1,5 @@
-use crate::errors::{ServiceError, ServiceResult};
+use crate::errors::ServiceResult;
+use crate::jwt::errors::JWTError;
 use crate::jwt::models::Claims;
 use crate::user::models::User;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
@@ -14,7 +15,7 @@ pub fn create_token(user: &User, auth_duration_in_hours: u16) -> ServiceResult<S
         &claims,
         &EncodingKey::from_secret(SECRET),
     )
-    .map_err(|e| ServiceError::BadRequest(e.to_string()))
+    .map_err(|_| JWTError::InvalidToken.into())
 }
 
 pub fn decode_token(token: &str) -> ServiceResult<Claims> {
@@ -24,5 +25,5 @@ pub fn decode_token(token: &str) -> ServiceResult<Claims> {
         &Validation::new(Algorithm::HS256),
     )
     .map(|data| data.claims)
-    .map_err(|e| ServiceError::BadRequest(e.to_string()))
+    .map_err(|_| JWTError::InvalidToken.into())
 }

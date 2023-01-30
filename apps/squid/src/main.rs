@@ -76,6 +76,7 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::post().to(meme))
             .route("/", web::get().to(index_playground))
     })
+    // TODO: Use actual config stuff
     .bind("0.0.0.0:4000")?
     .run()
     .await
