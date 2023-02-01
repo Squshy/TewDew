@@ -1,8 +1,8 @@
-mod users;
+pub mod middleware;
 
+use crate::user::resolvers::{UserMutation, UserQuery};
 use async_graphql::{EmptySubscription, Schema as GraphQLSchema};
 use sqlx::PgPool;
-pub use users::*;
 
 #[derive(Clone)]
 pub struct Context {
@@ -19,14 +19,21 @@ impl Context {
     }
 }
 
-pub struct QueryRoot;
-pub struct MutationRoot;
+#[derive(async_graphql::MergedObject, Default)]
+pub struct QueryRoot(UserQuery);
+
+#[derive(async_graphql::MergedObject, Default)]
+pub struct MutationRoot(UserMutation);
 
 pub type Schema = GraphQLSchema<QueryRoot, MutationRoot, EmptySubscription>;
 
 pub fn create_schema(context: Context) -> Schema {
-    Schema::build(QueryRoot, MutationRoot, EmptySubscription)
-        .data(context.db_pool)
-        .data(context.auth_duration_in_hours)
-        .finish()
+    Schema::build(
+        QueryRoot::default(),
+        MutationRoot::default(),
+        EmptySubscription,
+    )
+    .data(context.db_pool)
+    .data(context.auth_duration_in_hours)
+    .finish()
 }

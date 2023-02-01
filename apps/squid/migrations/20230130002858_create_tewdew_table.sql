@@ -4,7 +4,7 @@ CREATE TABLE tewdews(
     user_id uuid NOT NULL,
     completed boolean NOT NULL,
     title TEXT NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT fk_user
         FOREIGN KEY(user_id)
