@@ -1,3 +1,4 @@
+use crate::jwt::models::Token;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -17,4 +18,10 @@ pub struct NewUser {
     pub username: String,
     /// The users's password
     pub password: String,
+}
+
+#[derive(async_graphql::SimpleObject)]
+pub struct AuthUser {
+    pub user: User,
+    pub token: Token,
 }
