@@ -33,7 +33,7 @@ fn claims_from_http_request(http_req: HttpRequest) -> ServiceResult<Option<Claim
                 ));
             }
 
-            if token.len() > 2 {
+            if token.len() != 2 {
                 return Err(ServiceError::BadRequest(
                     "Invalid authorization header".to_string(),
                 ));
