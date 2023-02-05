@@ -1,7 +1,5 @@
+use super::{DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH};
 use crate::validation::check_length;
-
-const TITLE_MAX_LENGTH: usize = 35;
-const DESCRIPTION_MAX_LENGTH: usize = 255;
 
 #[derive(Debug, Clone, async_graphql::InputObject)]
 pub struct NewTewDew {

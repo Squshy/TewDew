@@ -1,20 +1,22 @@
-use super::models::{NewTewDew, TewDew};
+use super::errors::TewDewError;
+use super::models::{NewTewDew, SlimTewDew, UpdatedTewDew};
 use crate::errors::{ServiceError, ServiceResult};
 use sqlx::PgPool;
 use uuid::Uuid;
 
 pub async fn create(
     pool: &PgPool,
-    new_tew_dew: &NewTewDew,
+    new_tewdew: &NewTewDew,
     user_id: &Uuid,
-) -> ServiceResult<TewDew> {
+) -> ServiceResult<SlimTewDew> {
     let NewTewDew {
         completed,
         title,
         description,
-    } = new_tew_dew;
+    } = new_tewdew;
 
-    let tew_dew = sqlx::query!(
+    let tew_dew = sqlx::query_as!(
+        SlimTewDew,
         r#"
 INSERT INTO tewdews
 (id, user_id, completed, title, description)
@@ -30,13 +32,40 @@ RETURNING *"#,
     .await
     .map_err(|_| ServiceError::InternalDatabaseError)?;
 
-    // TODO: Can destructure probably
-    Ok(TewDew {
-        id: tew_dew.id,
-        completed: tew_dew.completed,
-        title: tew_dew.title,
-        description: tew_dew.description,
-        user_id: tew_dew.user_id,
-        tasks: vec![],
-    })
+    Ok(tew_dew)
+}
+
+pub async fn update(
+    pool: &PgPool,
+    updated_tewdew: UpdatedTewDew,
+    tewdew_id: Uuid,
+    user_id: Uuid,
+) -> ServiceResult<SlimTewDew> {
+    let UpdatedTewDew {
+        title,
+        description,
+        completed,
+    } = updated_tewdew;
+
+    let tew_dew = sqlx::query_as!(
+        SlimTewDew,
+        r#"
+UPDATE tewdews
+SET
+    title       = COALESCE($3, title),
+    description = COALESCE($4, description),
+    completed   = COALESCE($5, completed)
+WHERE id = $1 AND user_id = $2
+RETURNING *;"#,
+        tewdew_id,
+        user_id,
+        title,
+        description,
+        completed
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|_| TewDewError::NotFound)?;
+
+    Ok(tew_dew)
 }
