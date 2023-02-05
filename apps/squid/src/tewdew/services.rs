@@ -14,8 +14,7 @@ pub async fn create(
         description,
     } = new_tew_dew;
 
-    let tew_dew = sqlx::query_as!(
-        TewDew,
+    let tew_dew = sqlx::query!(
         r#"
 INSERT INTO tewdews
 (id, user_id, completed, title, description)
@@ -31,5 +30,13 @@ RETURNING *"#,
     .await
     .map_err(|_| ServiceError::InternalDatabaseError)?;
 
-    Ok(tew_dew)
+    // TODO: Can destructure probably
+    Ok(TewDew {
+        id: tew_dew.id,
+        completed: tew_dew.completed,
+        title: tew_dew.title,
+        description: tew_dew.description,
+        user_id: tew_dew.user_id,
+        tasks: vec![],
+    })
 }

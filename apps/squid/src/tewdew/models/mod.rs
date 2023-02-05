@@ -1,5 +1,6 @@
 mod new_tew_dew;
 
+use super::task::models::Task;
 pub use new_tew_dew::{NewTewDew, NewTewDewError};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -16,4 +17,6 @@ pub struct TewDew {
     pub title: String,
     /// A description of the TewDew
     pub description: Option<String>,
+    /// A list of tasks for the TewDew
+    pub tasks: Vec<Task>,
 }
