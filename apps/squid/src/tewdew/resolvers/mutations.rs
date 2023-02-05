@@ -5,7 +5,7 @@ use crate::schema::middleware::Middleware;
 use crate::tewdew::models::{
     NewTewDew, NewTewDewError, SlimTewDew, UpdateTewDewError, UpdatedTewDew,
 };
-use crate::tewdew::services::{create, update};
+use crate::tewdew::services::{create, delete, update};
 use async_graphql::{Context, Object};
 use uuid::Uuid;
 
@@ -64,5 +64,13 @@ impl TewDewMutation {
         let tew_dew = update(pool, tew_dew, id, sub).await?;
 
         Ok(UpdateTewDewResult::Ok(tew_dew))
+    }
+
+    async fn delete_tew_dew<'ctx>(&self, ctx: &Context<'ctx>, id: Uuid) -> ServiceResult<bool> {
+        let pool = get_pool_from_context(ctx)?;
+        let Claims { sub, .. } = get_claims_from_context(ctx)?;
+        delete(pool, id, sub).await?;
+
+        Ok(true)
     }
 }

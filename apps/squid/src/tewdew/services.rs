@@ -69,3 +69,16 @@ RETURNING *;"#,
 
     Ok(tew_dew)
 }
+
+pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> ServiceResult<bool> {
+    sqlx::query!(
+        r#"DELETE FROM tewdews WHERE id = $1 AND user_id = $2"#,
+        id,
+        user_id
+    )
+    .execute(pool)
+    .await
+    .map_err(|_| TewDewError::NotFound)?;
+
+    Ok(true)
+}
