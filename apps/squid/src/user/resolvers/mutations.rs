@@ -1,6 +1,7 @@
 use crate::errors::ServiceResult;
 use crate::jwt::models::Token;
 use crate::jwt::utils::create_token;
+use crate::schema::lib::{get_auth_duration_from_context, get_pool_from_context};
 use crate::user::models::{AuthUser, NewUser, NewUserError};
 use crate::user::services::{create, login};
 use async_graphql::{Context, Object};
@@ -9,7 +10,7 @@ use async_graphql::{Context, Object};
 pub struct UserMutation;
 
 #[derive(async_graphql::Union)]
-pub enum CreateResult {
+pub enum CreateUserResult {
     Ok(AuthUser),
     Err(NewUserError),
 }
@@ -21,19 +22,19 @@ impl UserMutation {
         ctx: &Context<'ctx>,
         username: String,
         password: String,
-    ) -> ServiceResult<CreateResult> {
+    ) -> ServiceResult<CreateUserResult> {
         let new_user = match NewUser::new(username, password) {
             Ok(user) => user,
-            Err(error) => return Ok(CreateResult::Err(error)),
+            Err(error) => return Ok(CreateUserResult::Err(error)),
         };
 
-        let pool = ctx.data::<sqlx::PgPool>().unwrap();
-        let auth_duration_in_hours = ctx.data::<u16>().unwrap();
+        let pool = get_pool_from_context(ctx)?;
+        let auth_duration_in_hours = get_auth_duration_from_context(ctx)?;
         let user = create(&pool, &new_user).await?;
-        let token = create_token(&user, *auth_duration_in_hours)?;
+        let token = create_token(&user, auth_duration_in_hours)?;
         let token = Token { bearer: token };
 
-        Ok(CreateResult::Ok(AuthUser { user, token }))
+        Ok(CreateUserResult::Ok(AuthUser { user, token }))
     }
 
     async fn login<'ctx>(
@@ -42,10 +43,10 @@ impl UserMutation {
         username: String,
         password: String,
     ) -> ServiceResult<AuthUser> {
-        let pool = ctx.data::<sqlx::PgPool>().unwrap();
-        let auth_duration_in_hours = ctx.data::<u16>().unwrap();
+        let pool = get_pool_from_context(ctx)?;
+        let auth_duration_in_hours = get_auth_duration_from_context(ctx)?;
         let user = login(&pool, &username, &password).await?;
-        let token = create_token(&user, *auth_duration_in_hours)?;
+        let token = create_token(&user, auth_duration_in_hours)?;
 
         Ok(AuthUser {
             user,
