@@ -23,6 +23,7 @@ async-graphql-actix-web = "5.0.5"
 chrono = "0.4.15"
 jsonwebtoken = "7"
 async-trait = "0.1.63"
+unicode-segmentation = "1"
 
 [dependencies.sqlx]
 version = "0.5.7"
@@ -36,3 +37,6 @@ features = [
     "migrate"
 ]
 
+
+[dev-dependencies]
+claim = "0.5"

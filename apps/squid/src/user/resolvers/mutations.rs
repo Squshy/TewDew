@@ -19,9 +19,10 @@ impl UserMutation {
     async fn create_user<'ctx>(
         &self,
         ctx: &Context<'ctx>,
-        new_user: NewUser,
+        username: String,
+        password: String,
     ) -> ServiceResult<CreateResult> {
-        let new_user = match new_user.parse() {
+        let new_user = match NewUser::new(username, password) {
             Ok(user) => user,
             Err(error) => return Ok(CreateResult::Err(error)),
         };
