@@ -60,3 +60,19 @@ RETURNING *;"#,
 
     Ok(task)
 }
+
+pub async fn delete(pool: &PgPool, task_id: Uuid, user_id: Uuid) -> ServiceResult<bool> {
+    // Should I care about updating the "completed" status of the top tewdew if we delete a false
+    // completed task which leads the tewdew to have a count of 2/2 completed if previously was
+    // 2/3? Eh.
+    sqlx::query!(
+        r#"DELETE FROM tasks WHERE id = $1 AND user_id = $2;"#,
+        task_id,
+        user_id
+    )
+    .execute(pool)
+    .await
+    .map_err(|_| TaskError::NotFound)?;
+
+    Ok(true)
+}

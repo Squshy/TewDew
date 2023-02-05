@@ -3,7 +3,7 @@ use crate::jwt::models::Claims;
 use crate::schema::lib::{get_claims_from_context, get_pool_from_context};
 use crate::schema::middleware::Middleware;
 use crate::tewdew::task::models::{NewTask, NewTaskError, Task, UpdateTaskError, UpdatedTask};
-use crate::tewdew::task::services::{create, update};
+use crate::tewdew::task::services::{create, delete, update};
 use async_graphql::{Context, Object};
 use uuid::Uuid;
 
@@ -62,5 +62,14 @@ impl TaskMutation {
         let task = update(pool, updated_task, task_id, sub).await?;
 
         Ok(UpdateTaskResult::Ok(task))
+    }
+
+    #[graphql(guard = "Middleware::Authorized")]
+    async fn delete_task<'ctx>(&self, ctx: &Context<'ctx>, task_id: Uuid) -> ServiceResult<bool> {
+        let pool = get_pool_from_context(ctx)?;
+        let Claims { sub, .. } = get_claims_from_context(ctx)?;
+
+        delete(pool, task_id, sub).await?;
+        Ok(true)
     }
 }
