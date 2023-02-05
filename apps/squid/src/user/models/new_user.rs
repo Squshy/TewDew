@@ -1,4 +1,4 @@
-use unicode_segmentation::UnicodeSegmentation;
+use crate::validation::check_length;
 const USERNAME_MAX_LENGTH: usize = 20;
 const PASSWORD_MAX_LENGTH: usize = 100;
 
@@ -26,12 +26,12 @@ impl NewUser {
             password: None,
         };
 
-        match Self::check_length(&username, USERNAME_MAX_LENGTH) {
+        match check_length(&username, USERNAME_MAX_LENGTH) {
             Ok(_) => (),
             Err(e) => error.username = Some(format!("Username {}", e)),
         }
 
-        match Self::check_length(&password, PASSWORD_MAX_LENGTH) {
+        match check_length(&password, PASSWORD_MAX_LENGTH) {
             Ok(_) => (),
             Err(e) => error.password = Some(format!("Password {}", e)),
         }
@@ -41,23 +41,6 @@ impl NewUser {
         } else {
             Err(error)
         }
-    }
-
-    fn check_length(value: &String, max_length: usize) -> Result<(), String> {
-        if value.trim().is_empty() {
-            return Err("must not be empty".into());
-        }
-
-        // Graphemes are perceived as a single character but it is combined of
-        // two characters. For example a french letter with an accent + an english
-        // letter
-        if value.graphemes(true).count() > max_length {
-            return Err(format!("must be less than {} characters long", max_length));
-        }
-
-        // Forbidden characters?
-
-        Ok(())
     }
 }
 

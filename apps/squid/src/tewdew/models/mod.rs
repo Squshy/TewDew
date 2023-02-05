@@ -1,3 +1,6 @@
+mod new_tew_dew;
+
+pub use new_tew_dew::{NewTewDew, NewTewDewError};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -11,16 +14,6 @@ pub struct TewDew {
     pub completed: bool,
     /// The title of the TewDew
     pub title: String,
-    /// A description of the TewDew
-    pub description: Option<String>,
-}
-
-#[derive(Debug, async_graphql::InputObject)]
-pub struct NewTewDew {
-    /// The title of the TewDew
-    pub title: String,
-    /// Denotes if the TewDew has been completed
-    pub completed: Option<bool>,
     /// A description of the TewDew
     pub description: Option<String>,
 }
