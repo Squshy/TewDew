@@ -1,4 +1,3 @@
-use super::errors::TewDewError;
 use super::models::{NewTewDew, TewDew};
 use crate::errors::{ServiceError, ServiceResult};
 use sqlx::PgPool;
@@ -33,16 +32,4 @@ RETURNING *"#,
     .map_err(|_| ServiceError::InternalDatabaseError)?;
 
     Ok(tew_dew)
-}
-
-pub async fn get_by_id(pool: &PgPool, id: Uuid) -> ServiceResult<TewDew> {
-    let tew_dew = sqlx::query_as!(TewDew, r#"SELECT * FROM tewdews WHERE id = $1"#, id)
-        .fetch_optional(pool)
-        .await
-        .map_err(|_| ServiceError::InternalDatabaseError)?;
-
-    match tew_dew {
-        Some(tew_dew) => Ok(tew_dew),
-        None => Err(TewDewError::NotFound.into()),
-    }
 }

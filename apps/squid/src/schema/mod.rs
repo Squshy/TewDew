@@ -2,6 +2,7 @@ pub mod lib;
 pub mod middleware;
 
 use crate::tewdew::resolvers::{TewDewMutation, TewDewQuery};
+use crate::tewdew::task::resolvers::TaskMutation;
 use crate::user::resolvers::{UserMutation, UserQuery};
 use async_graphql::{EmptySubscription, Schema as GraphQLSchema};
 use sqlx::PgPool;
@@ -25,7 +26,7 @@ impl Context {
 pub struct QueryRoot(UserQuery, TewDewQuery);
 
 #[derive(async_graphql::MergedObject, Default)]
-pub struct MutationRoot(UserMutation, TewDewMutation);
+pub struct MutationRoot(UserMutation, TewDewMutation, TaskMutation);
 
 pub type Schema = GraphQLSchema<QueryRoot, MutationRoot, EmptySubscription>;
 
