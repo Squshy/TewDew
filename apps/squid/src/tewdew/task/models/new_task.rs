@@ -1,7 +1,6 @@
+use super::TITLE_MAX_LENGTH;
 use crate::validation::check_length;
 use uuid::Uuid;
-
-const TITLE_MAX_LENGTH: usize = 35;
 
 #[derive(Debug, Clone, async_graphql::InputObject)]
 pub struct NewTask {
