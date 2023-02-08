@@ -10,8 +10,6 @@ pub enum JWTError {
 
 impl From<JWTError> for ServiceError {
     fn from(error: JWTError) -> ServiceError {
-        match error {
-            JWTError::InvalidToken => ServiceError::BadRequest("Invalid JWT token".to_string()),
-        }
+        ServiceError::BadRequest(error.to_string())
     }
 }
