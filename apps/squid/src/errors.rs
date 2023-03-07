@@ -17,4 +17,10 @@ pub enum ServiceError {
     InternalDatabaseError,
 }
 
+impl From<sqlx::Error> for ServiceError {
+    fn from(_value: sqlx::Error) -> Self {
+        ServiceError::InternalDatabaseError
+    }
+}
+
 pub type ServiceResult<T> = std::result::Result<T, ServiceError>;

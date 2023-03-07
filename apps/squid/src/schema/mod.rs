@@ -1,5 +1,6 @@
 pub mod lib;
 pub mod middleware;
+pub mod models;
 
 use crate::tewdew::resolvers::{TewDewMutation, TewDewQuery};
 use crate::tewdew::task::resolvers::TaskMutation;

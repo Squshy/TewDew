@@ -1,6 +1,7 @@
 use super::errors::TewDewError;
 use super::models::{NewTewDew, SlimTewDew, UpdatedTewDew};
 use crate::errors::{ServiceError, ServiceResult};
+use crate::schema::models::ListParams;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -68,6 +69,31 @@ RETURNING *;"#,
     .map_err(|_| TewDewError::NotFound)?;
 
     Ok(tew_dew)
+}
+
+pub async fn list(
+    pool: &PgPool,
+    user_id: Uuid,
+    list_params: ListParams,
+) -> ServiceResult<Vec<SlimTewDew>> {
+    let ListParams { skip, limit } = list_params;
+
+    let tew_dews: Vec<SlimTewDew> = sqlx::query_as!(
+        SlimTewDew,
+        r#"
+SELECT * FROM tewdews WHERE user_id = $1
+ORDER BY updated_at
+OFFSET $2
+LIMIT $3;
+"#,
+        user_id,
+        i64::from(skip),
+        i64::from(limit)
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(tew_dews)
 }
 
 pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> ServiceResult<bool> {
