@@ -59,7 +59,7 @@ impl TaskMutation {
 
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
-        let task = update(pool, updated_task, task_id, sub).await?;
+        let task = update(pool, updated_task, task_id, *sub).await?;
 
         Ok(UpdateTaskResult::Ok(task))
     }
@@ -69,7 +69,7 @@ impl TaskMutation {
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
 
-        delete(pool, task_id, sub).await?;
+        delete(pool, task_id, *sub).await?;
         Ok(true)
     }
 }

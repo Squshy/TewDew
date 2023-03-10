@@ -3,19 +3,20 @@ use crate::jwt::models::Claims;
 use async_graphql::Context;
 use sqlx::PgPool;
 
-// TODO: This is basically same as middleware and kinda ugly
-pub fn get_claims_from_context(ctx: &Context<'_>) -> ServiceResult<Claims> {
-    let claims_result = ctx.data_opt::<ServiceResult<Option<Claims>>>();
+pub fn get_claims_from_context<'c>(ctx: &Context<'c>) -> ServiceResult<&'c Claims> {
+    // This is essentially doing double work since we check in the request guard
+    // and after to get the data. Need to find a way to add it somewhere we can
+    // retrieve or this is fine? idk.
+    let claims = ctx
+        .data::<ServiceResult<Option<Claims>>>()
+        .or_else(|_| Err(ServiceError::Unauthorized))?;
 
-    match claims_result {
-        Some(val) => match val {
-            Ok(val) => match val {
-                Some(val) => Ok(val.clone()),
-                None => Err(ServiceError::Unauthorized.into()),
-            },
-            Err(e) => Err(e.clone()),
+    match claims {
+        Ok(claims) => match claims {
+            Some(claims) => Ok(claims),
+            None => Err(ServiceError::Unauthorized),
         },
-        None => Err(ServiceError::Unauthorized.into()),
+        Err(e) => Err(e.clone()),
     }
 }
 

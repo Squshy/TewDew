@@ -41,7 +41,7 @@ impl TewDewMutation {
 
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
-        let tew_dew = create(pool, &new_tew_dew, &sub).await?;
+        let tew_dew = create(pool, &new_tew_dew, sub).await?;
 
         Ok(CreateTewDewResult::Ok(tew_dew))
     }
@@ -61,7 +61,7 @@ impl TewDewMutation {
 
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
-        let tew_dew = update(pool, tew_dew, id, sub).await?;
+        let tew_dew = update(pool, tew_dew, id, *sub).await?;
 
         Ok(UpdateTewDewResult::Ok(tew_dew))
     }
@@ -69,7 +69,7 @@ impl TewDewMutation {
     async fn delete_tew_dew<'ctx>(&self, ctx: &Context<'ctx>, id: Uuid) -> ServiceResult<bool> {
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
-        delete(pool, id, sub).await?;
+        delete(pool, id, *sub).await?;
 
         Ok(true)
     }
