@@ -13,6 +13,7 @@ pub struct User {
     /// The user's username
     pub username: String,
     /// The users's password
+    #[graphql(skip)]
     pub password: String,
 }
 

@@ -45,3 +45,12 @@ pub async fn create(pool: &PgPool, new_user: &NewUser) -> ServiceResult<User> {
         password: user.password,
     })
 }
+
+pub async fn get_by_id(pool: &PgPool, id: &Uuid) -> ServiceResult<User> {
+    let user = sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", id)
+        .fetch_one(pool)
+        .await
+        .map_err(|_| UserError::NotFound)?;
+
+    Ok(user)
+}
