@@ -25,8 +25,8 @@ VALUES ($1, $2, $3, $4, $5)
 RETURNING *"#,
         &Uuid::new_v4(),
         user_id,
-        &completed.unwrap_or(false),
-        &title,
+        completed.unwrap_or(false),
+        title,
         *description
     )
     .fetch_one(pool)
@@ -38,9 +38,9 @@ RETURNING *"#,
 
 pub async fn update(
     pool: &PgPool,
-    updated_tewdew: UpdatedTewDew,
-    tewdew_id: Uuid,
-    user_id: Uuid,
+    updated_tewdew: &UpdatedTewDew,
+    tewdew_id: &Uuid,
+    user_id: &Uuid,
 ) -> ServiceResult<SlimTewDew> {
     let UpdatedTewDew {
         title,
@@ -60,9 +60,9 @@ WHERE id = $1 AND user_id = $2
 RETURNING *;"#,
         tewdew_id,
         user_id,
-        title,
-        description,
-        completed
+        *title,
+        *description,
+        *completed
     )
     .fetch_one(pool)
     .await
@@ -73,8 +73,8 @@ RETURNING *;"#,
 
 pub async fn list(
     pool: &PgPool,
-    user_id: Uuid,
-    list_params: ListParams,
+    user_id: &Uuid,
+    list_params: &ListParams,
 ) -> ServiceResult<Vec<SlimTewDew>> {
     let ListParams { skip, limit } = list_params;
 
@@ -87,8 +87,8 @@ OFFSET $2
 LIMIT $3;
 "#,
         user_id,
-        i64::from(skip),
-        i64::from(limit)
+        i64::from(*skip),
+        i64::from(*limit)
     )
     .fetch_all(pool)
     .await?;
@@ -141,7 +141,7 @@ LIMIT $3;
     Ok(tew_dews)
 }
 
-pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> ServiceResult<bool> {
+pub async fn delete(pool: &PgPool, id: &Uuid, user_id: &Uuid) -> ServiceResult<bool> {
     sqlx::query!(
         r#"DELETE FROM tewdews WHERE id = $1 AND user_id = $2"#,
         id,
