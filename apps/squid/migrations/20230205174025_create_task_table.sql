@@ -5,6 +5,6 @@ CREATE TABLE tasks (
     completed boolean NOT NULL,
     title TEXT NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT fk_tewdew FOREIGN KEY(tewdew_id) REFERENCES tewdews(id),
-    CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id)
+    CONSTRAINT fk_tewdew FOREIGN KEY(tewdew_id) REFERENCES tewdews(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );

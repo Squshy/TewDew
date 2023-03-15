@@ -8,5 +8,5 @@ CREATE TABLE tewdews(
     PRIMARY KEY (id),
     CONSTRAINT fk_user
         FOREIGN KEY(user_id)
-            REFERENCES users(id)
+            REFERENCES users(id) ON DELETE CASCADE
 );
