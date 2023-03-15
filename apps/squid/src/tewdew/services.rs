@@ -1,7 +1,7 @@
 use super::errors::TewDewError;
 use super::models::{NewTewDew, SlimTewDew, TewDew, UpdatedTewDew};
 use crate::errors::{ServiceError, ServiceResult};
-use crate::schema::models::ListParams;
+use crate::schema::models::StrictListParams;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -74,10 +74,8 @@ RETURNING *;"#,
 pub async fn list(
     pool: &PgPool,
     user_id: &Uuid,
-    list_params: &ListParams,
+    list_params: &StrictListParams,
 ) -> ServiceResult<Vec<SlimTewDew>> {
-    let ListParams { skip, limit } = list_params;
-
     let tew_dews: Vec<SlimTewDew> = sqlx::query_as!(
         SlimTewDew,
         r#"
@@ -87,8 +85,8 @@ OFFSET $2
 LIMIT $3;
 "#,
         user_id,
-        i64::from(*skip),
-        i64::from(*limit)
+        list_params.skip,
+        list_params.limit
     )
     .fetch_all(pool)
     .await?;
@@ -99,10 +97,8 @@ LIMIT $3;
 pub async fn list_with_tasks(
     pool: &PgPool,
     user_id: &Uuid,
-    list_params: &ListParams,
+    list_params: &StrictListParams,
 ) -> ServiceResult<Vec<TewDew>> {
-    let ListParams { skip, limit } = list_params;
-
     let tew_dews = sqlx::query!(
         r#"
 SELECT tewdews.*,
@@ -117,8 +113,8 @@ OFFSET $2
 LIMIT $3;
 "#,
         user_id,
-        i64::from(*skip),
-        i64::from(*limit),
+        list_params.skip,
+        list_params.limit
     )
     .fetch_all(pool)
     .await?

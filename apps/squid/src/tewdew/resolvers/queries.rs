@@ -21,6 +21,6 @@ impl TewDewQuery {
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
 
-        list_with_tasks(pool, sub, &list_params).await
+        list_with_tasks(pool, sub, &list_params.into()).await
     }
 }
