@@ -23,10 +23,4 @@ impl From<sqlx::Error> for ServiceError {
     }
 }
 
-impl From<serde_json::Error> for ServiceError {
-    fn from(_value: serde_json::Error) -> Self {
-        ServiceError::InternalServerError
-    }
-}
-
 pub type ServiceResult<T> = std::result::Result<T, ServiceError>;

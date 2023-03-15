@@ -76,8 +76,7 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::post().to(post_requests))
             .route("/", web::get().to(index_playground))
     })
-    // TODO: Use actual config stuff
-    .bind("0.0.0.0:4000")?
+    .bind(format!("0.0.0.0:{}", configuration.application_port))?
     .run()
     .await
 }
