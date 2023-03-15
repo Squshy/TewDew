@@ -34,9 +34,9 @@ RETURNING *;"#,
 
 pub async fn update(
     pool: &PgPool,
-    updated_task: UpdatedTask,
-    task_id: Uuid,
-    user_id: Uuid,
+    updated_task: &UpdatedTask,
+    task_id: &Uuid,
+    user_id: &Uuid,
 ) -> ServiceResult<Task> {
     let UpdatedTask { title, completed } = updated_task;
 
@@ -51,8 +51,8 @@ WHERE id = $1 AND user_id = $2
 RETURNING *;"#,
         task_id,
         user_id,
-        title,
-        completed
+        *title,
+        *completed
     )
     .fetch_one(pool)
     .await
@@ -61,7 +61,7 @@ RETURNING *;"#,
     Ok(task)
 }
 
-pub async fn delete(pool: &PgPool, task_id: Uuid, user_id: Uuid) -> ServiceResult<bool> {
+pub async fn delete(pool: &PgPool, task_id: &Uuid, user_id: &Uuid) -> ServiceResult<bool> {
     // Should I care about updating the "completed" status of the top tewdew if we delete a false
     // completed task which leads the tewdew to have a count of 2/2 completed if previously was
     // 2/3? Eh.
