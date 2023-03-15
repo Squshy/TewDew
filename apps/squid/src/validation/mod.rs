@@ -1,6 +1,5 @@
 use unicode_segmentation::UnicodeSegmentation;
 
-// TODO: tests
 pub fn check_length(value: &String, max_length: usize) -> Result<(), String> {
     if value.trim().is_empty() {
         return Err("must not be empty".into());
