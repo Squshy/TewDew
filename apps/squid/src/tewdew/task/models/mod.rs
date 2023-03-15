@@ -3,6 +3,7 @@ mod updated_task;
 pub const TITLE_MAX_LENGTH: usize = 35;
 
 use async_graphql::SimpleObject;
+use chrono::{DateTime, Utc};
 pub use new_task::{NewTask, NewTaskError};
 use serde::{Deserialize, Serialize};
 pub use updated_task::{UpdateTaskError, UpdatedTask};
@@ -20,4 +21,8 @@ pub struct Task {
     pub title: String,
     /// Flag for if the task is completed
     pub completed: bool,
+    /// Date and time task was created at
+    pub created_at: DateTime<Utc>,
+    /// Date and time task was last updated at
+    pub updated_at: DateTime<Utc>,
 }
