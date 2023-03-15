@@ -47,7 +47,7 @@ fn claims_from_http_request(http_req: HttpRequest) -> ServiceResult<Option<Claim
     }
 }
 
-async fn meme(
+async fn post_requests(
     schema: web::Data<Schema>,
     http_req: HttpRequest,
     req: GraphQLRequest,
@@ -73,7 +73,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(schema.clone())
-            .route("/", web::post().to(meme))
+            .route("/", web::post().to(post_requests))
             .route("/", web::get().to(index_playground))
     })
     // TODO: Use actual config stuff
