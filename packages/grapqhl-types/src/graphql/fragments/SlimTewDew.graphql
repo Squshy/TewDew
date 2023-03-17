@@ -2,7 +2,7 @@ fragment SingleSlimTewDew on SlimTewDew {
   id
   userId
   completed
-  title
+  titleAlias: title @alias(name: "title")
   description
   createdAt
   updatedAt

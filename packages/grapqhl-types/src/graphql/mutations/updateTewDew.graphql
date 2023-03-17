@@ -12,11 +12,10 @@ mutation UpdateTewDew(
   ) {
     __typename
     ... on SlimTewDew {
-      ...SingleSliMTewDew
+      ...SingleSlimTewDew
     }
     ... on UpdateTewDewError {
-      title
-      description
+      ...UpdateTewDewErrorF
     }
   }
 }

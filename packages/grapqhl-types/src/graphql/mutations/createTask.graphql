@@ -5,7 +5,7 @@ mutation CreateTask($tewdewId: UUID!, $title: String!, $completed: Boolean) {
       ...SingleTask
     }
     ... on NewTaskError {
-      title
+      ...NewTaskErrorF
     }
   }
 }

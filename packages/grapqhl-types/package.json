@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Generated GraphQL types",
   "scripts": {
-    "generate": "graphql-code-generator --config ./codegen.ts"
+    "gen": "graphql-code-generator --config ./codegen.yml"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +14,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "graphql": "^16.6.0",
-    "urql": "^3.0.4"
+    "@urql/core": "^3.2.2",
+    "graphql": "^16.6.0"
   }
 }

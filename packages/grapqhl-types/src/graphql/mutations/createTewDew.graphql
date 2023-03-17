@@ -13,8 +13,7 @@ mutation CreateTewDew(
       ...SingleSlimTewDew
     }
     ... on NewTewDewError {
-      title?
-      description
+      ...NewTewDewErrorF
     }
   }
 }

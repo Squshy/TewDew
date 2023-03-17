@@ -1,0 +1,3 @@
+fragment NewTaskErrorF on NewTaskError {
+  title
+}
