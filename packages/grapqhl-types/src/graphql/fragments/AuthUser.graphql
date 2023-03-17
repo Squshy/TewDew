@@ -1,0 +1,8 @@
+fragment SingleAuthUser on AuthUser {
+  user {
+    ...SingleUser
+  }
+  token {
+    bearer
+  }
+}
