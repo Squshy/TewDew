@@ -9,3 +9,6 @@ generates:
       - "typescript-urql"
     config:
       urqlImportFrom: "@urql/core"
+      withHooks: false
+      useTypeImports: true
+      addTypename: true
