@@ -1,0 +1,11 @@
+mutation CreateTask($tewdewId: UUID!, $title: String!, $completed: Boolean) {
+  createTask(tewdewId: $tewdewId, title: $title, completed: $completed) {
+    __typename
+    ... on Task {
+      ...SingleTask
+    }
+    ... on NewTaskError {
+      title
+    }
+  }
+}
