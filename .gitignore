@@ -16,6 +16,9 @@ build
 # rust
 target
 
+# generated files
+generated/
+
 # misc
 .DS_Store
 *.pem

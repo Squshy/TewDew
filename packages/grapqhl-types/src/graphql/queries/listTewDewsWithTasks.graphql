@@ -1,0 +1,5 @@
+query ListTewDewsWithTasks($listParams: ListParams) {
+  listTewDewsWithTasks(listParams: $listParams) {
+    ...SingleTewDew
+  }
+}

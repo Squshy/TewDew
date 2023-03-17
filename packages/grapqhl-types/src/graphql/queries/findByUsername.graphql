@@ -1,0 +1,5 @@
+query FindByUsername($username: String!) {
+  findByUsername(username: $username) {
+    ...SingleUser
+  }
+}
