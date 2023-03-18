@@ -1,0 +1,11 @@
+mutation UpdateTask($taskId: UUID!, $titleOpt: String, $completed: Boolean) {
+  updateTask(taskId: $taskId, title: $titleOpt, completed: $completed) {
+    __typename
+    ... on Task {
+      ...SingleTask
+    }
+    ... on UpdateTaskError {
+      ...UpdateTaskErrorF
+    }
+  }
+}

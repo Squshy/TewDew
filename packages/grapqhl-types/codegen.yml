@@ -1,0 +1,15 @@
+overwrite: true
+schema: ${SCHEMA_LOCATION}
+documents: "src/graphql/**/*.graphql"
+generates:
+  src/generated/graphql.tsx:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-urql"
+    config:
+      urqlImportFrom: "@urql/core"
+      gqlImport: "@urql/core#gql"
+      withHooks: false
+      useTypeImports: true
+      addTypename: true

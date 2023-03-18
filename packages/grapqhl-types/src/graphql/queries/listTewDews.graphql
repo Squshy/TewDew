@@ -1,0 +1,5 @@
+query ListTewDews($listparams: ListParams) {
+  listTewDews(listParams: $listparams) {
+    ...SingleSlimTewDew
+  }
+}
