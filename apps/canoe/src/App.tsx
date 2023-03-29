@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useState, useEffect } from 'react';
 //
-import { useLogin } from './urql';
+import { UrqlClientProvider, useLogin } from './urql';
 
 type WrapperProps = {
     children?: ReactNode | ReactNode[];
@@ -94,13 +94,15 @@ const LoginForm = () => {
 
 const App = () => {
     return (
-        <div className="flex w-full h-full">
-            <Wrapper>
-                <div className="flex flex-col w-full">
-                    <LoginForm />
-                </div>
-            </Wrapper>
-        </div>
+        <UrqlClientProvider>
+            <div className="flex w-full h-full">
+                <Wrapper>
+                    <div className="flex flex-col w-full">
+                        <LoginForm />
+                    </div>
+                </Wrapper>
+            </div>
+        </UrqlClientProvider>
     );
 };
 
