@@ -25,6 +25,7 @@ jsonwebtoken = "7"
 async-trait = "0.1.63"
 unicode-segmentation = "1"
 serde_json = { version = "1.0", features = ["raw_value"] }
+actix-cors = { version = "0.6.4" }
 
 [dependencies.sqlx]
 version = "0.5.7"

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+//
+import { useLogin } from './urql';
 
 type WrapperProps = {
     children?: ReactNode | ReactNode[];
@@ -18,11 +20,19 @@ const Wrapper = (props: WrapperProps) => {
 const LoginForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [state, login] = useLogin();
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('here');
+        await login({ password, username });
     };
+
+    useEffect(() => {
+        if (!state) {
+            return;
+        }
+        console.log({ state });
+    }, [state]);
 
     return (
         <form onSubmit={handleSubmit} className="flex w-full justify-center">
@@ -68,6 +78,15 @@ const LoginForm = () => {
                         Sign in
                     </button>
                 </div>
+                {state?.errors && (
+                    <div>
+                        {state?.errors.map((err) => (
+                            <p key={err} className="text-red-500">
+                                {err}
+                            </p>
+                        ))}
+                    </div>
+                )}
             </div>
         </form>
     );
