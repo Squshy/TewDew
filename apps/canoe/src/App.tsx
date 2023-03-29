@@ -7,7 +7,7 @@ type WrapperProps = {
     children?: ReactNode | ReactNode[];
 };
 
-const Wrapper = (props: WrapperProps) => {
+function Wrapper(props: WrapperProps) {
     return (
         <div className="flex w-full justify-center">
             <div className="flex max-w-4xl w-full justify-center self-center">
@@ -15,9 +15,9 @@ const Wrapper = (props: WrapperProps) => {
             </div>
         </div>
     );
-};
+}
 
-const LoginForm = () => {
+function LoginForm() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [state, login] = useLogin();
@@ -90,9 +90,9 @@ const LoginForm = () => {
             </div>
         </form>
     );
-};
+}
 
-const App = () => {
+function App() {
     return (
         <UrqlClientProvider>
             <div className="flex w-full h-full">
@@ -104,6 +104,6 @@ const App = () => {
             </div>
         </UrqlClientProvider>
     );
-};
+}
 
 export default App;
