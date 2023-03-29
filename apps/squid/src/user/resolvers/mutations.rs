@@ -1,5 +1,4 @@
 use crate::errors::ServiceResult;
-use crate::jwt::models::Token;
 use crate::jwt::utils::create_token;
 use crate::schema::lib::{get_auth_duration_from_context, get_pool_from_context};
 use crate::user::models::{AuthUser, NewUser, NewUserError};
@@ -32,7 +31,6 @@ impl UserMutation {
         let auth_duration_in_hours = get_auth_duration_from_context(ctx)?;
         let user = create(&pool, &new_user).await?;
         let token = create_token(&user, auth_duration_in_hours)?;
-        let token = Token { bearer: token };
 
         Ok(CreateUserResult::Ok(AuthUser { user, token }))
     }
@@ -48,9 +46,6 @@ impl UserMutation {
         let user = login(&pool, &username, &password).await?;
         let token = create_token(&user, auth_duration_in_hours)?;
 
-        Ok(AuthUser {
-            user,
-            token: Token { bearer: token },
-        })
+        Ok(AuthUser { user, token })
     }
 }
