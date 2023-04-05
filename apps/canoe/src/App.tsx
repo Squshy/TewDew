@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import { useState, useEffect } from 'react';
+import { useRef, ReactNode } from 'react';
 //
 import { UrqlClientProvider, useLogin } from './urql';
 
@@ -18,21 +17,21 @@ function Wrapper(props: WrapperProps) {
 }
 
 function LoginForm() {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const usernameRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
     const [state, login] = useLogin();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        await login({ password, username });
-    };
-
-    useEffect(() => {
-        if (!state) {
+        const username = usernameRef.current?.value;
+        const password = passwordRef.current?.value;
+        // TODO: Some fancy stuff
+        if (!username || !password) {
             return;
         }
-        console.log({ state });
-    }, [state]);
+        const result = await login({ password, username });
+        console.log({ result });
+    };
 
     return (
         <form onSubmit={handleSubmit} className="flex w-full justify-center">
@@ -49,8 +48,7 @@ function LoginForm() {
                     <input
                         type="text"
                         id="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        ref={usernameRef}
                         placeholder="Username"
                         className="relative block w-full rounded-md border-0 p-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 focus:outline-none sm:text-sm sm:leading-6 drop-shadow"
                         required
@@ -63,8 +61,7 @@ function LoginForm() {
                     <input
                         type="password"
                         id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        ref={passwordRef}
                         placeholder="Password"
                         className="relative block w-full rounded-md border-0 p-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 focus:outline-none sm:text-sm sm:leading-6 drop-shadow"
                         required

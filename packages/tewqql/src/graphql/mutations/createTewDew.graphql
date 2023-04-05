@@ -1,19 +1,20 @@
 mutation CreateTewDew(
-  $title: String!
-  $completed: Boolean
-  $description: String
+    $title: String!
+    $completed: Boolean
+    $description: String
 ) {
-  createTewDew(
-    title: $title
-    completed: $completed
-    description: $description
-  ) {
-    __typename
-    ... on SlimTewDew {
-      ...SingleSlimTewDew
+    createTewDew(
+        title: $title
+        completed: $completed
+        description: $description
+    ) {
+        __typename
+        ... on SlimTewDew {
+            ...SingleSlimTewDew
+        }
+        ... on NewTewDewError {
+            titleErr: title
+            descriptionErr: description
+        }
     }
-    ... on NewTewDewError {
-      ...NewTewDewErrorF
-    }
-  }
 }

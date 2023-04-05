@@ -1,12 +1,11 @@
 mutation CreateUser($username: String!, $password: String!) {
-  createUser(username: $username, password: $password) {
-    __typename
-    ... on AuthUser {
-      ...SingleAuthUser
+    createUser(username: $username, password: $password) {
+        ... on User {
+            ...SingleUser
+        }
+        ... on NewUserError {
+            usernameErr: username
+            passwordErr: password
+        }
     }
-    ... on NewUserError {
-      username
-      password
-    }
-  }
 }
