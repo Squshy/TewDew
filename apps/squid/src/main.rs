@@ -29,15 +29,15 @@ fn claims_from_http_request(http_req: HttpRequest) -> ServiceResult<Option<Claim
             let token: Vec<&str> = header.split("Bearer ").collect();
 
             if token.is_empty() {
-                return Err(ServiceError::BadRequest(
-                    "Missing authorization header".to_string(),
-                ));
+                return Err(
+                    ServiceError::BadRequest("Missing authorization header".to_string()).into(),
+                );
             }
 
             if token.len() != 2 {
-                return Err(ServiceError::BadRequest(
-                    "Invalid authorization header".to_string(),
-                ));
+                return Err(
+                    ServiceError::BadRequest("Invalid authorization header".to_string()).into(),
+                );
             }
 
             let claims = decode_token(token[1])?;

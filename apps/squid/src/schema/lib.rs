@@ -14,7 +14,7 @@ pub fn get_claims_from_context<'c>(ctx: &Context<'c>) -> ServiceResult<&'c Claim
     match claims {
         Ok(claims) => match claims {
             Some(claims) => Ok(claims),
-            None => Err(ServiceError::Unauthorized),
+            None => Err(ServiceError::Unauthorized.into()),
         },
         Err(e) => Err(e.clone()),
     }
@@ -34,4 +34,8 @@ pub fn get_auth_duration_from_context(ctx: &Context<'_>) -> ServiceResult<u16> {
         .map_err(|_| ServiceError::InternalServerError)?;
 
     Ok(duration.clone())
+}
+
+pub fn add_token_to_request_headers(ctx: &Context<'_>, token: String) {
+    ctx.insert_http_header("x-token", token);
 }

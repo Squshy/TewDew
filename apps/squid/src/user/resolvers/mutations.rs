@@ -1,7 +1,9 @@
 use crate::errors::ServiceResult;
 use crate::jwt::utils::create_token;
-use crate::schema::lib::{get_auth_duration_from_context, get_pool_from_context};
-use crate::user::models::{AuthUser, NewUser, NewUserError};
+use crate::schema::lib::{
+    add_token_to_request_headers, get_auth_duration_from_context, get_pool_from_context,
+};
+use crate::user::models::{NewUser, NewUserError, User};
 use crate::user::services::{create, login};
 use async_graphql::{Context, Object};
 
@@ -10,7 +12,7 @@ pub struct UserMutation;
 
 #[derive(async_graphql::Union)]
 pub enum CreateUserResult {
-    Ok(AuthUser),
+    Ok(User),
     Err(NewUserError),
 }
 
@@ -32,7 +34,8 @@ impl UserMutation {
         let user = create(&pool, &new_user).await?;
         let token = create_token(&user, auth_duration_in_hours)?;
 
-        Ok(CreateUserResult::Ok(AuthUser { user, token }))
+        add_token_to_request_headers(ctx, token);
+        Ok(CreateUserResult::Ok(user))
     }
 
     async fn login<'ctx>(
@@ -40,12 +43,13 @@ impl UserMutation {
         ctx: &Context<'ctx>,
         username: String,
         password: String,
-    ) -> ServiceResult<AuthUser> {
+    ) -> ServiceResult<User> {
         let pool = get_pool_from_context(ctx)?;
         let auth_duration_in_hours = get_auth_duration_from_context(ctx)?;
         let user = login(&pool, &username, &password).await?;
         let token = create_token(&user, auth_duration_in_hours)?;
 
-        Ok(AuthUser { user, token })
+        add_token_to_request_headers(ctx, token);
+        Ok(user)
     }
 }
