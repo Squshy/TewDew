@@ -1,7 +1,7 @@
 mutation CreateUser($username: String!, $password: String!) {
     createUser(username: $username, password: $password) {
-        ... on User {
-            ...SingleUser
+        ... on AuthUser {
+            ...SingleAuthUser
         }
         ... on NewUserError {
             usernameErr: username

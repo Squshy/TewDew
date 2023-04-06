@@ -39,12 +39,17 @@ function useMutation<Data, Variables extends AnyVariables = AnyVariables>(
         async (variables: Variables) => {
             setState((prev) => ({ ...prev, fetching: true }));
             const result = await client.mutation(query, variables).toPromise();
-            console.log({ result });
-            setState({
-                fetching: false,
-                data: result.data,
-                errors: result.error?.graphQLErrors.map((err) => err.message),
-            });
+
+            if (isMounted.current) {
+                setState({
+                    fetching: false,
+                    data: result.data,
+                    errors: result.error?.graphQLErrors.map(
+                        (err) => err.message
+                    ),
+                });
+            }
+
             return result;
         },
         [client, query, setState]

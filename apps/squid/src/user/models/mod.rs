@@ -15,3 +15,13 @@ pub struct User {
     #[graphql(skip)]
     pub password: String,
 }
+
+#[derive(async_graphql::SimpleObject, Debug, Serialize, Deserialize)]
+pub struct AuthUser {
+    /// The user's id
+    pub id: Uuid,
+    /// The user's username
+    pub username: String,
+    /// JWT authentication token
+    pub token: String,
+}

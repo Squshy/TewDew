@@ -35,7 +35,3 @@ pub fn get_auth_duration_from_context(ctx: &Context<'_>) -> ServiceResult<u16> {
 
     Ok(duration.clone())
 }
-
-pub fn add_token_to_request_headers(ctx: &Context<'_>, token: String) {
-    ctx.insert_http_header("x-token", token);
-}

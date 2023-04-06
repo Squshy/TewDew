@@ -13,7 +13,7 @@ const client = createClient({
     exchanges: [
         cacheExchange(),
         authExchange(async (utils): Promise<AuthConfig> => {
-            const token = localStorage.get('x-token');
+            const token = localStorage.getItem('x-token');
 
             return {
                 addAuthToOperation(operation) {
