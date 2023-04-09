@@ -50,3 +50,9 @@ impl From<Option<ListParams>> for StrictListParams {
         }
     }
 }
+
+#[derive(async_graphql::SimpleObject)]
+pub struct FieldError {
+    pub field: String,
+    pub message: String,
+}

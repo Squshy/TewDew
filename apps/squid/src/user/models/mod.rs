@@ -1,6 +1,6 @@
 mod new_user;
 
-pub use new_user::{NewUser, NewUserError};
+pub use new_user::NewUser;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
