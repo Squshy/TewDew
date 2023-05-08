@@ -56,3 +56,9 @@ pub struct FieldError {
     pub field: String,
     pub message: String,
 }
+
+impl FieldError {
+    pub fn new(field: String, message: String) -> Self {
+        FieldError { field, message }
+    }
+}

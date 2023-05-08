@@ -2,6 +2,7 @@ use crate::errors::ServiceResult;
 use crate::jwt::models::Claims;
 use crate::schema::lib::{get_claims_from_context, get_pool_from_context};
 use crate::schema::middleware::Middleware;
+use crate::schema::models::FieldError;
 use crate::tewdew::models::{
     NewTewDew, NewTewDewError, SlimTewDew, UpdateTewDewError, UpdatedTewDew,
 };
@@ -12,10 +13,10 @@ use uuid::Uuid;
 #[derive(Default)]
 pub struct TewDewMutation;
 
-#[derive(async_graphql::Union)]
-pub enum CreateTewDewResult {
-    Ok(SlimTewDew),
-    Err(NewTewDewError),
+#[derive(async_graphql::SimpleObject)]
+pub struct CreateTewDewResult {
+    tew_dew: Option<SlimTewDew>,
+    tew_dew_errors: Option<Vec<FieldError>>,
 }
 
 #[derive(async_graphql::Union)]
@@ -36,14 +37,22 @@ impl TewDewMutation {
     ) -> ServiceResult<CreateTewDewResult> {
         let new_tew_dew = match NewTewDew::parse(title, completed, description) {
             Ok(val) => val,
-            Err(e) => return Ok(CreateTewDewResult::Err(e)),
+            Err(e) => {
+                return Ok(CreateTewDewResult {
+                    tew_dew_errors: Some(e),
+                    tew_dew: None,
+                })
+            }
         };
 
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
         let tew_dew = create(pool, &new_tew_dew, sub).await?;
 
-        Ok(CreateTewDewResult::Ok(tew_dew))
+        Ok(CreateTewDewResult {
+            tew_dew: Some(tew_dew),
+            tew_dew_errors: None,
+        })
     }
 
     async fn update_tew_dew<'ctx>(
