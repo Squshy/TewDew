@@ -8,13 +8,11 @@ mutation CreateTewDew(
         completed: $completed
         description: $description
     ) {
-        __typename
-        ... on SlimTewDew {
+        tewDew {
             ...SingleSlimTewDew
         }
-        ... on NewTewDewError {
-            titleErr: title
-            descriptionErr: description
+        tewDewErrors {
+            ...TewDewErrors
         }
     }
 }

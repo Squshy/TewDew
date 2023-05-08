@@ -1,11 +1,10 @@
 mutation CreateTask($tewdewId: UUID!, $title: String!, $completed: Boolean) {
     createTask(tewdewId: $tewdewId, title: $title, completed: $completed) {
-        __typename
-        ... on Task {
+        task {
             ...SingleTask
         }
-        ... on NewTaskError {
-            titleErr: title
+        taskErrors {
+            ...TaskErrors
         }
     }
 }

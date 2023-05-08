@@ -10,13 +10,11 @@ mutation UpdateTewDew(
         completed: $completed
         description: $description
     ) {
-        __typename
-        ... on SlimTewDew {
+        tewDew {
             ...SingleSlimTewDew
         }
-        ... on UpdateTewDewError {
-            titleErr: title
-            descriptionErr: description
+        tewDewErrors {
+            ...TewDewErrors
         }
     }
 }
