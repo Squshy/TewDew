@@ -19,10 +19,10 @@ pub struct CreateTewDewResult {
     tew_dew_errors: Option<Vec<FieldError>>,
 }
 
-#[derive(async_graphql::Union)]
-pub enum UpdateTewDewResult {
-    Ok(SlimTewDew),
-    Err(UpdateTewDewError),
+#[derive(async_graphql::SimpleObject)]
+pub struct UpdateTewDewResult {
+    tew_dew: Option<SlimTewDew>,
+    tew_dew_errors: Option<Vec<FieldError>>,
 }
 
 #[Object]
@@ -65,14 +65,22 @@ impl TewDewMutation {
     ) -> ServiceResult<UpdateTewDewResult> {
         let tew_dew = match UpdatedTewDew::validate(title, description, completed)? {
             Ok(val) => val,
-            Err(e) => return Ok(UpdateTewDewResult::Err(e)),
+            Err(e) => {
+                return Ok(UpdateTewDewResult {
+                    tew_dew_errors: Some(e),
+                    tew_dew: None,
+                })
+            }
         };
 
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
         let tew_dew = update(pool, &tew_dew, &id, sub).await?;
 
-        Ok(UpdateTewDewResult::Ok(tew_dew))
+        Ok(UpdateTewDewResult {
+            tew_dew: Some(tew_dew),
+            tew_dew_errors: None,
+        })
     }
 
     async fn delete_tew_dew<'ctx>(&self, ctx: &Context<'ctx>, id: Uuid) -> ServiceResult<bool> {

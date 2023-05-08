@@ -1,6 +1,7 @@
 use super::super::errors::TewDewError;
 use super::{DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH};
 use crate::errors::ServiceResult;
+use crate::schema::models::FieldError;
 use crate::validation::check_length;
 
 #[derive(Debug, Clone, async_graphql::InputObject)]
@@ -13,49 +14,39 @@ pub struct UpdatedTewDew {
     pub completed: Option<bool>,
 }
 
-#[derive(Debug, async_graphql::SimpleObject)]
-pub struct UpdateTewDewError {
-    title: Option<String>,
-    description: Option<String>,
-}
-
 impl UpdatedTewDew {
+    // Different validation names for every struct cuz I'll find one I like eventually
     pub fn validate(
         title: Option<String>,
         description: Option<String>,
         completed: Option<bool>,
-    ) -> ServiceResult<Result<UpdatedTewDew, UpdateTewDewError>> {
+    ) -> ServiceResult<Result<UpdatedTewDew, Vec<FieldError>>> {
         if title.is_none() && completed.is_none() && description.is_none() {
             return Err(TewDewError::EmptyUpdate.into());
         }
 
-        let mut error = UpdateTewDewError {
-            title: None,
-            description: None,
-        };
+        let mut errors: Vec<FieldError> = vec![];
 
         if let Some(title) = &title {
-            match check_length(&title, TITLE_MAX_LENGTH) {
-                Ok(_) => (),
-                Err(e) => error.title = Some(format!("Title {}", e)),
+            if let Err(err) = check_length(&title, TITLE_MAX_LENGTH) {
+                errors.push(FieldError::new("title".into(), err));
             }
         }
 
         if let Some(description) = &description {
-            match check_length(&description, DESCRIPTION_MAX_LENGTH) {
-                Ok(_) => (),
-                Err(e) => error.title = Some(format!("Description {}", e)),
+            if let Err(err) = check_length(&description, DESCRIPTION_MAX_LENGTH) {
+                errors.push(FieldError::new("description".into(), err));
             }
         }
 
-        if error.title.is_none() && error.description.is_none() {
-            Ok(Ok(UpdatedTewDew {
+        if errors.is_empty() {
+            return Ok(Ok(UpdatedTewDew {
                 title,
                 description,
                 completed,
-            }))
-        } else {
-            Ok(Err(error))
+            }));
         }
+
+        Ok(Err(errors))
     }
 }
