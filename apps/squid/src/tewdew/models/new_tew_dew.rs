@@ -24,7 +24,7 @@ impl NewTewDew {
             tew_dew_errors.push(FieldError::new("title".into(), err));
         }
 
-        if let Some(desc) = description {
+        if let Some(desc) = &description {
             if let Err(err) = check_length(&desc, DESCRIPTION_MAX_LENGTH) {
                 tew_dew_errors.push(FieldError::new("description".into(), err));
             }

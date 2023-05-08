@@ -3,9 +3,7 @@ use crate::jwt::models::Claims;
 use crate::schema::lib::{get_claims_from_context, get_pool_from_context};
 use crate::schema::middleware::Middleware;
 use crate::schema::models::FieldError;
-use crate::tewdew::models::{
-    NewTewDew, NewTewDewError, SlimTewDew, UpdateTewDewError, UpdatedTewDew,
-};
+use crate::tewdew::models::{NewTewDew, SlimTewDew, UpdatedTewDew};
 use crate::tewdew::services::{create, delete, update};
 use async_graphql::{Context, Object};
 use uuid::Uuid;
