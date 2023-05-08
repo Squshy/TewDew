@@ -17,10 +17,10 @@ pub struct CreateTaskResult {
     task_errors: Option<Vec<FieldError>>,
 }
 
-#[derive(async_graphql::Union)]
-pub enum UpdateTaskResult {
-    Ok(Task),
-    Err(UpdateTaskError),
+#[derive(async_graphql::SimpleObject)]
+pub struct UpdateTaskResult {
+    task: Option<Task>,
+    task_errors: Option<Vec<FieldError>>,
 }
 
 #[Object]
@@ -63,14 +63,22 @@ impl TaskMutation {
     ) -> ServiceResult<UpdateTaskResult> {
         let updated_task = match UpdatedTask::validate(title, completed)? {
             Ok(val) => val,
-            Err(e) => return Ok(UpdateTaskResult::Err(e)),
+            Err(e) => {
+                return Ok(UpdateTaskResult {
+                    task_errors: Some(e),
+                    task: None,
+                })
+            }
         };
 
         let pool = get_pool_from_context(ctx)?;
         let Claims { sub, .. } = get_claims_from_context(ctx)?;
         let task = update(pool, &updated_task, &task_id, sub).await?;
 
-        Ok(UpdateTaskResult::Ok(task))
+        Ok(UpdateTaskResult {
+            task: Some(task),
+            task_errors: None,
+        })
     }
 
     #[graphql(guard = "Middleware::Authorized")]

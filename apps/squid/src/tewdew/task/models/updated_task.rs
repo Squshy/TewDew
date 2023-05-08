@@ -1,6 +1,7 @@
 use super::super::errors::TaskError;
 use super::TITLE_MAX_LENGTH;
 use crate::errors::ServiceResult;
+use crate::schema::models::FieldError;
 use crate::validation::check_length;
 
 #[derive(Debug, Clone, async_graphql::InputObject)]
@@ -11,33 +12,22 @@ pub struct UpdatedTask {
     pub completed: Option<bool>,
 }
 
-#[derive(Debug, async_graphql::SimpleObject)]
-pub struct UpdateTaskError {
-    title: Option<String>,
-}
-
 impl UpdatedTask {
     pub fn validate(
         title: Option<String>,
         completed: Option<bool>,
-    ) -> ServiceResult<Result<UpdatedTask, UpdateTaskError>> {
+    ) -> ServiceResult<Result<UpdatedTask, Vec<FieldError>>> {
         if title.is_none() && completed.is_none() {
             return Err(TaskError::EmptyUpdateError.into());
         }
 
-        let mut error = UpdateTaskError { title: None };
-
         if let Some(title) = &title {
-            match check_length(&title, TITLE_MAX_LENGTH) {
-                Ok(_) => (),
-                Err(e) => error.title = Some(format!("Title {}", e)),
+            if let Err(err) = check_length(&title, TITLE_MAX_LENGTH) {
+                let errors = vec![FieldError::new("title".into(), err)];
+                return Ok(Err(errors));
             }
         }
 
-        if error.title.is_none() {
-            Ok(Ok(UpdatedTask { title, completed }))
-        } else {
-            Ok(Err(error))
-        }
+        Ok(Ok(UpdatedTask { title, completed }))
     }
 }
