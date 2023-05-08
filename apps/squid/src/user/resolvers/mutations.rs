@@ -10,7 +10,7 @@ use async_graphql::{Context, Object};
 pub struct UserMutation;
 
 #[derive(async_graphql::SimpleObject)]
-pub struct RegisterResult {
+pub struct UserResult {
     user: Option<AuthUser>,
     user_errors: Option<Vec<FieldError>>,
 }
@@ -22,10 +22,10 @@ impl UserMutation {
         ctx: &Context<'ctx>,
         username: String,
         password: String,
-    ) -> ServiceResult<RegisterResult> {
+    ) -> ServiceResult<UserResult> {
         let new_user = NewUser::new(username, password);
         if let Some(user_errors) = new_user.errors() {
-            return Ok(RegisterResult {
+            return Ok(UserResult {
                 user_errors: Some(user_errors),
                 user: None,
             });
@@ -36,7 +36,7 @@ impl UserMutation {
         let user = create(&pool, &new_user.username, &new_user.password).await?;
         let token = create_token(&user, auth_duration_in_hours)?;
 
-        Ok(RegisterResult {
+        Ok(UserResult {
             user: Some(AuthUser {
                 username: user.username,
                 id: user.id,
@@ -51,16 +51,33 @@ impl UserMutation {
         ctx: &Context<'ctx>,
         username: String,
         password: String,
-    ) -> ServiceResult<AuthUser> {
+    ) -> ServiceResult<UserResult> {
+        // Probably not a good idea to validate existing users off of current
+        // user definition as requirements for name and password etc change over
+        // time and they could have legacy lengths. For this simple program it is
+        // fine.
+        let user = NewUser::new(username, password);
+        if let Some(user_errors) = user.errors() {
+            return Ok(UserResult {
+                user_errors: Some(user_errors),
+                user: None,
+            });
+        }
+
         let pool = get_pool_from_context(ctx)?;
         let auth_duration_in_hours = get_auth_duration_from_context(ctx)?;
-        let user = login(&pool, &username, &password).await?;
+        let user = login(&pool, &user.username, &user.password).await?;
         let token = create_token(&user, auth_duration_in_hours)?;
 
-        Ok(AuthUser {
+        let auth_user = AuthUser {
             username: user.username,
             id: user.id,
             token,
+        };
+
+        Ok(UserResult {
+            user: Some(auth_user),
+            user_errors: None,
         })
     }
 }
