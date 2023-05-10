@@ -1,22 +1,25 @@
 import { useContext, createContext, ReactNode } from 'react';
 import { createClient, fetchExchange } from '@urql/core';
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { authExchange, AuthConfig } from '@urql/exchange-auth';
+import { authExchange } from '@urql/exchange-auth';
 //
 
-const GRAPHQL_CODES = {
+const GRAPHQL_CODE = {
     FORBIDDEN: 'FORBIDDEN',
+    UNAUTHORIZED: 'UNAUTHORIZED',
 } as const;
 
 const client = createClient({
     url: 'http://localhost:4000/',
     exchanges: [
         cacheExchange(),
-        authExchange(async (utils): Promise<AuthConfig> => {
-            const token = localStorage.getItem('x-token');
-
+        authExchange(async (utils) => {
             return {
                 addAuthToOperation(operation) {
+                    // Accessing this on every request
+                    // This could be improved
+                    const token = localStorage.getItem('x-token');
+
                     if (!token) {
                         return operation;
                     }
@@ -26,9 +29,12 @@ const client = createClient({
                     });
                 },
                 didAuthError(error) {
-                    return error.graphQLErrors.some(
-                        (e) => e.extensions?.code === GRAPHQL_CODES.FORBIDDEN
-                    );
+                    return error.graphQLErrors.some((e) => {
+                        return (
+                            e.extensions?.code === GRAPHQL_CODE.FORBIDDEN ||
+                            e.extensions?.code === GRAPHQL_CODE.UNAUTHORIZED
+                        );
+                    });
                 },
                 async refreshAuth() {
                     // no-op

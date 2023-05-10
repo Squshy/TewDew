@@ -1,7 +1,17 @@
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { TypedDocumentNode, AnyVariables, OperationResult } from '@urql/core';
 //
-import { LoginMutation, LoginDocument, LoginMutationVariables } from 'tewgql';
+import {
+    LoginMutation,
+    LoginDocument,
+    LoginMutationVariables,
+    RegisterMutation,
+    RegisterMutationVariables,
+    RegisterDocument,
+    CreateTewDewMutation,
+    CreateTewDewMutationVariables,
+    CreateTewDewDocument,
+} from 'tewgql';
 //
 import useUrqlClient from './client';
 
@@ -44,6 +54,7 @@ function useMutation<Data, Variables extends AnyVariables = AnyVariables>(
                 setState({
                     fetching: false,
                     data: result.data,
+                    // Extract the error mesasges from the fatal GraphQL errors
                     errors: result.error?.graphQLErrors.map(
                         (err) => err.message
                     ),
@@ -60,4 +71,16 @@ function useMutation<Data, Variables extends AnyVariables = AnyVariables>(
 
 export function useLogin() {
     return useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+}
+
+export function useRegister() {
+    return useMutation<RegisterMutation, RegisterMutationVariables>(
+        RegisterDocument
+    );
+}
+
+export function useCreateTewDew() {
+    return useMutation<CreateTewDewMutation, CreateTewDewMutationVariables>(
+        CreateTewDewDocument
+    );
 }
