@@ -11,7 +11,7 @@ import {
 //
 import useUrqlClient from './client';
 import getCacheForClient from './cache';
-import { MeQueryVariables } from 'tewgql';
+import { MeDocument, MeQuery, MeQueryVariables } from 'tewgql';
 
 type UseQueryArgs<Data, Variables extends AnyVariables = AnyVariables> = {
     pause?: boolean;
@@ -22,6 +22,15 @@ type State<T> = {
     data: T | undefined;
     errors: string[] | undefined;
 };
+
+type QueryFn<
+    Data,
+    Variables extends AnyVariables = AnyVariables
+> = () => Promise<OperationResult<Data, Variables>>;
+type UseQueryResponse<T, V extends AnyVariables = AnyVariables> = [
+    State<T>,
+    QueryFn<T, V>
+];
 
 function useRequest<Data, Variables extends AnyVariables = AnyVariables>(
     query: DocumentInput<Data, Variables>,
@@ -43,7 +52,7 @@ function useRequest<Data, Variables extends AnyVariables = AnyVariables>(
 
 function useQuery<Data, Variables extends AnyVariables = AnyVariables>(
     params: UseQueryArgs<Data, Variables>
-) {
+): UseQueryResponse<Data, Variables> {
     const isMounted = useRef(true);
     const client = useUrqlClient();
     const cache = getCacheForClient(client);
@@ -78,11 +87,12 @@ function useQuery<Data, Variables extends AnyVariables = AnyVariables>(
 
         cache.set(request.key, result);
 
-        return result;
+        // HACK: Don't care about the other types I don't think?
+        return result as OperationResult<Data, Variables>;
     }, [client, params.query, params.variables, setState]);
 
     useEffect(() => {
-        if (params.pause) {
+        if (params.pause || state.data || state.errors) {
             return;
         }
 
@@ -92,7 +102,16 @@ function useQuery<Data, Variables extends AnyVariables = AnyVariables>(
             cache.dispose(request.key);
             isMounted.current = false;
         };
-    }, [execute, params.pause]);
+    }, [execute, params.pause, state, cache]);
 
     return [state, execute];
+}
+
+export function useMeQuery(
+    options: Omit<UseQueryArgs<MeQueryVariables>, 'query' | 'variables'> = {}
+) {
+    return useQuery<MeQuery, MeQueryVariables>({
+        query: MeDocument,
+        ...options,
+    });
 }
