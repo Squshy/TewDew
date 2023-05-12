@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 //
-import { useLogin, buildFieldErrorMap } from './urql';
+import { useLoginMutation, buildFieldErrorMap } from './urql';
 // Components
 import InputField from './components/InputField';
 
@@ -8,7 +8,7 @@ export default function Login() {
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
     const [errors, setErrors] = useState<Record<string, string>>();
-    const [state, login] = useLogin();
+    const [state, login] = useLoginMutation();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

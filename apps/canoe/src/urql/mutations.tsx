@@ -69,17 +69,17 @@ function useMutation<Data, Variables extends AnyVariables = AnyVariables>(
     return [state, execute];
 }
 
-export function useLogin() {
+export function useLoginMutation() {
     return useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
 }
 
-export function useRegister() {
+export function useRegisterMutation() {
     return useMutation<RegisterMutation, RegisterMutationVariables>(
         RegisterDocument
     );
 }
 
-export function useCreateTewDew() {
+export function useCreateTewDewMutation() {
     return useMutation<CreateTewDewMutation, CreateTewDewMutationVariables>(
         CreateTewDewDocument
     );

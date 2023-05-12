@@ -1,14 +1,14 @@
 import { useRef, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 //
-import { useRegister, buildFieldErrorMap } from './urql';
+import { useRegisterMutation, buildFieldErrorMap } from './urql';
 // Components
 import InputField from './components/InputField';
 
 export default function Register() {
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
-    const [state, register] = useRegister();
+    const [state, register] = useRegisterMutation();
     const [errors, setErrors] = useState<Record<string, string>>();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
