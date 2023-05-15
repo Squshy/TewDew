@@ -3,6 +3,7 @@ import { createClient, fetchExchange } from '@urql/core';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { authExchange } from '@urql/exchange-auth';
 //
+import { getStoredItem, STORAGE_KEY } from '../utils/local-storage';
 
 const GRAPHQL_CODE = {
     FORBIDDEN: 'FORBIDDEN',
@@ -18,7 +19,7 @@ const client = createClient({
                 addAuthToOperation(operation) {
                     // Accessing this on every request
                     // This could be improved
-                    const token = localStorage.getItem('x-token');
+                    const token = getStoredItem(STORAGE_KEY.AUTH);
 
                     if (!token) {
                         return operation;

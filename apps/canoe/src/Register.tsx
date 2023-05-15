@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 //
 import { useRegisterMutation, buildFieldErrorMap } from './urql';
+import { setStoredItem, STORAGE_KEY } from './utils/local-storage';
 // Components
 import InputField from './components/InputField';
 
@@ -28,7 +29,7 @@ export default function Register() {
             const errorMap = buildFieldErrorMap(userErrors);
             setErrors(errorMap);
         } else if (user) {
-            localStorage.setItem('x-token', user.token);
+            setStoredItem(STORAGE_KEY.AUTH, user.token);
         }
     };
 

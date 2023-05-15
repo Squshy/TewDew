@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { useLoginMutation, buildFieldErrorMap } from './urql';
 // Components
 import InputField from './components/InputField';
+import { setStoredItem, STORAGE_KEY } from './utils/local-storage';
 
 export default function Login() {
     const usernameRef = useRef<HTMLInputElement>(null);
@@ -29,7 +30,7 @@ export default function Login() {
             const errorMap = buildFieldErrorMap(userErrors);
             setErrors(errorMap);
         } else if (user) {
-            localStorage.setItem('x-token', user.token);
+            setStoredItem(STORAGE_KEY.AUTH, user.token);
         }
     };
 
