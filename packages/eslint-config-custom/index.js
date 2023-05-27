@@ -10,6 +10,9 @@ const config = {
     ],
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'react', 'react-hooks'],
+    rules: {
+        'react/react-in-jsx-scope': 'off',
+    },
     parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
@@ -17,7 +20,6 @@ const config = {
             jsx: true,
         },
     },
-    rules: {},
 };
 
 module.exports = config;
