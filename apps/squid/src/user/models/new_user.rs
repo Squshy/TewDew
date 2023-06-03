@@ -22,14 +22,14 @@ impl NewUser {
         if let Err(err) = check_length(&self.username, USERNAME_MAX_LENGTH) {
             user_errors.push(FieldError {
                 field: "username".into(),
-                message: err,
+                message: format!("Username {err}"),
             });
         }
 
         if let Err(err) = check_length(&self.password, PASSWORD_MAX_LENGTH) {
             user_errors.push(FieldError {
                 field: "password".into(),
-                message: err,
+                message: format!("Password {err}"),
             });
         }
 
