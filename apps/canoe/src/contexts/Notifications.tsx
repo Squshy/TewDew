@@ -255,7 +255,12 @@ export function NotificationProvider(props: NotificationProviderProps) {
     }, []);
 
     const expireNode = useCallback((key: string) => {
-        store.current.delete(key);
+        const deleted = store.current.delete(key);
+
+        if (!deleted) {
+            return;
+        }
+
         store.current = new Map(store.current);
         for (const cb of subscribers.current) {
             cb();
