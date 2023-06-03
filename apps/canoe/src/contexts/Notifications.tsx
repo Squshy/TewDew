@@ -28,9 +28,9 @@ type InternalNotificationContext = {
 };
 
 type NotificationContext = {
-    showSuccess: NotificationFn;
-    showError: NotificationFn;
-    showWarning: NotificationFn;
+    notifySuccess: NotificationFn;
+    notifyError: NotificationFn;
+    notifyWarning: NotificationFn;
 };
 
 type NotificationType = typeof NotificationType[keyof typeof NotificationType];
@@ -253,7 +253,7 @@ export function NotificationProvider(props: NotificationProviderProps) {
         return () => subscribers.current.delete(cb);
     }, []);
 
-    const showSuccess = useCallback(
+    const notifySuccess = useCallback(
         (params: NotificationFnParams): void => {
             const node = createNotificationNode({
                 type: NotificationType.SUCCESS,
@@ -265,7 +265,7 @@ export function NotificationProvider(props: NotificationProviderProps) {
         [addNode]
     );
 
-    const showError = useCallback(
+    const notifyError = useCallback(
         (params: NotificationFnParams): void => {
             const node = createNotificationNode({
                 type: NotificationType.ERROR,
@@ -277,7 +277,7 @@ export function NotificationProvider(props: NotificationProviderProps) {
         [addNode]
     );
 
-    const showWarning = useCallback(
+    const notifyWarning = useCallback(
         (params: NotificationFnParams): void => {
             const node = createNotificationNode({
                 type: NotificationType.WARNING,
@@ -290,7 +290,7 @@ export function NotificationProvider(props: NotificationProviderProps) {
     );
 
     return (
-        <Context.Provider value={{ showSuccess, showWarning, showError }}>
+        <Context.Provider value={{ notifySuccess, notifyWarning, notifyError }}>
             <InternalContext.Provider
                 value={{ getNodeMap, subscribe, expireNode }}
             >
