@@ -18,7 +18,7 @@ type NotificationFnParams = Partial<
     message: string;
 };
 
-type NotificationFn = (args: NotificationFnParams) => void;
+type NotificationFn = (args: NotificationFnParams) => NotificationNode;
 
 type ExpireNodeFn = (key: string) => void;
 type InternalNotificationContext = {
@@ -28,9 +28,13 @@ type InternalNotificationContext = {
 };
 
 type NotificationContext = {
+    notify: (
+        args: NotificationFnParams & { type: NotificationType }
+    ) => NotificationNode;
     notifySuccess: NotificationFn;
     notifyError: NotificationFn;
     notifyWarning: NotificationFn;
+    expireNode: ExpireNodeFn;
 };
 
 type NotificationType = typeof NotificationType[keyof typeof NotificationType];
@@ -44,7 +48,7 @@ const NotificationType = {
 type NotificationNode = {
     key: string;
     message: string;
-    title: string;
+    title?: string | undefined;
     type: NotificationType;
     createdAt: number;
     expiresInMs: number;
@@ -65,7 +69,7 @@ function createNotificationNode({
 }: {
     type: NotificationType;
     message: string;
-    title?: string;
+    title?: string | undefined;
     expiresInMs?: number;
 }): NotificationNode {
     const messageKey = message.replace(/\s/g, '').toLocaleLowerCase();
@@ -80,8 +84,8 @@ function createNotificationNode({
         type,
         message,
         expiresInMs,
+        title,
         createdAt: Date.now(),
-        title: title ?? `${type.charAt(0).toUpperCase()}${type.slice(1)}`,
     };
 }
 
@@ -185,11 +189,17 @@ function Notification({ node, expireNode }: NotificationProps) {
             }`}
         >
             <div className="w-64 flex flex-col space-y-2">
-                <div className="w-full flex space-x-2 items-center">
+                <div className="w-full flex space-x-2 items-start">
                     <NotificationIcon node={node} />
-                    <p className="flex-1 text-md align-middle font-semibold text-slate-700">
-                        {node.title}
-                    </p>
+                    {node.title ? (
+                        <p className="flex-1 text-md align-middle font-semibold text-slate-700">
+                            {node.title}
+                        </p>
+                    ) : (
+                        <p className="w-full text-sm text-slate-500 break-words whitespace-normal">
+                            {node.message}
+                        </p>
+                    )}
                     <button
                         onClick={expireAfterAnimating}
                         className="w-4 transition-all duration-200 ease-out text-slate-900 hover:text-slate-700 hover:scale-125"
@@ -210,9 +220,11 @@ function Notification({ node, expireNode }: NotificationProps) {
                         </svg>
                     </button>
                 </div>
-                <p className="w-full text-sm text-slate-500 break-words whitespace-normal">
-                    {node.message}
-                </p>
+                {node.title && (
+                    <p className="w-full text-sm text-slate-500 break-words whitespace-normal">
+                        {node.message}
+                    </p>
+                )}
             </div>
         </div>
     );
@@ -230,7 +242,7 @@ export function NotificationProvider(props: NotificationProviderProps) {
         // Do not notify subscribers or update to new map reference
         // if we currently have a similar node.
         if (store.current.has(node.key)) {
-            return;
+            return node;
         }
 
         store.current.set(node.key, node);
@@ -238,6 +250,8 @@ export function NotificationProvider(props: NotificationProviderProps) {
         for (const cb of subscribers.current) {
             cb();
         }
+
+        return node;
     }, []);
 
     const expireNode = useCallback((key: string) => {
@@ -253,44 +267,46 @@ export function NotificationProvider(props: NotificationProviderProps) {
         return () => subscribers.current.delete(cb);
     }, []);
 
-    const notifySuccess = useCallback(
-        (params: NotificationFnParams): void => {
-            const node = createNotificationNode({
-                type: NotificationType.SUCCESS,
-                ...params,
-            });
-
-            addNode(node);
+    // TODO: Add generic dull notification type
+    const notify = useCallback(
+        (params: NotificationFnParams & { type: NotificationType }) => {
+            const node = createNotificationNode(params);
+            return addNode(node);
         },
         [addNode]
+    );
+
+    const notifySuccess = useCallback(
+        (params: Omit<NotificationFnParams, 'type'>): NotificationNode => {
+            return notify({ ...params, type: NotificationType.SUCCESS });
+        },
+        [notify]
     );
 
     const notifyError = useCallback(
-        (params: NotificationFnParams): void => {
-            const node = createNotificationNode({
-                type: NotificationType.ERROR,
-                ...params,
-            });
-
-            addNode(node);
+        (params: Omit<NotificationFnParams, 'type'>): NotificationNode => {
+            return notify({ ...params, type: NotificationType.ERROR });
         },
-        [addNode]
+        [notify]
     );
 
     const notifyWarning = useCallback(
-        (params: NotificationFnParams): void => {
-            const node = createNotificationNode({
-                type: NotificationType.WARNING,
-                ...params,
-            });
-
-            addNode(node);
+        (params: Omit<NotificationFnParams, 'type'>): NotificationNode => {
+            return notify({ ...params, type: NotificationType.WARNING });
         },
-        [addNode]
+        [notify]
     );
 
     return (
-        <Context.Provider value={{ notifySuccess, notifyWarning, notifyError }}>
+        <Context.Provider
+            value={{
+                notify,
+                notifySuccess,
+                notifyWarning,
+                notifyError,
+                expireNode,
+            }}
+        >
             <InternalContext.Provider
                 value={{ getNodeMap, subscribe, expireNode }}
             >
