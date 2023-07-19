@@ -1,15 +1,16 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
+import { useAlert } from '@alertle/react';
 //
-import { useLoginMutation, buildFieldErrorMap } from './urql';
+import { useLoginMutation } from './urql';
 // Components
 import InputField from './components/InputField';
 import { setStoredItem, STORAGE_KEY } from './utils/local-storage';
 
 export default function Login() {
+    const { notifyError } = useAlert();
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
-    const [errors, setErrors] = useState<Record<string, string>>();
-    const [state, login] = useLoginMutation();
+    const [, login] = useLoginMutation();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -27,8 +28,9 @@ export default function Login() {
         const userErrors = result.data?.login.userErrors;
 
         if (userErrors) {
-            const errorMap = buildFieldErrorMap(userErrors);
-            setErrors(errorMap);
+            for (const err of userErrors) {
+                notifyError({ message: err.message });
+            }
         } else if (user) {
             setStoredItem(STORAGE_KEY.AUTH, user.token);
         }
@@ -50,7 +52,6 @@ export default function Login() {
                         placeholder="Username"
                         type="text"
                         ref={usernameRef}
-                        error={errors?.username}
                         required
                     />
                     <InputField
@@ -59,7 +60,6 @@ export default function Login() {
                         placeholder="Password"
                         type="password"
                         ref={passwordRef}
-                        error={errors?.password}
                         required
                     />
                     <div>
@@ -70,15 +70,6 @@ export default function Login() {
                             Sign in
                         </button>
                     </div>
-                    {state?.errors && (
-                        <div>
-                            {state?.errors.map((err) => (
-                                <p key={err} className="text-red-500">
-                                    {err}
-                                </p>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </form>
         </div>

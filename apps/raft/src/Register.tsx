@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 //
-import { useRegisterMutation, buildFieldErrorMap } from './urql';
+import { useAlert } from '@alertle/react';
+import { useRegisterMutation } from './urql';
 import { setStoredItem, STORAGE_KEY } from './utils/local-storage';
 // Components
 import InputField from './components/InputField';
@@ -9,8 +10,8 @@ import InputField from './components/InputField';
 export default function Register() {
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
-    const [state, register] = useRegisterMutation();
-    const [errors, setErrors] = useState<Record<string, string>>();
+    const [, register] = useRegisterMutation();
+    const { notifyError } = useAlert();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -26,8 +27,9 @@ export default function Register() {
         const userErrors = result.data?.register.userErrors;
 
         if (userErrors) {
-            const errorMap = buildFieldErrorMap(userErrors);
-            setErrors(errorMap);
+            for (const err of userErrors) {
+                notifyError({ message: err.message });
+            }
         } else if (user) {
             setStoredItem(STORAGE_KEY.AUTH, user.token);
         }
@@ -49,7 +51,6 @@ export default function Register() {
                         placeholder="Username"
                         type="text"
                         ref={usernameRef}
-                        error={errors?.username}
                         required
                     />
                     <InputField
@@ -58,7 +59,6 @@ export default function Register() {
                         placeholder="Password"
                         type="password"
                         ref={passwordRef}
-                        error={errors?.password}
                         required
                     />
                     <div>
@@ -69,15 +69,6 @@ export default function Register() {
                             Register
                         </button>
                     </div>
-                    {state?.errors && (
-                        <div>
-                            {state?.errors.map((err) => (
-                                <p key={err} className="text-red-500">
-                                    {err}
-                                </p>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </form>
         </div>
