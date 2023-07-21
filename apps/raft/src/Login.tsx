@@ -2,8 +2,9 @@ import { useRef } from 'react';
 import { useAlert } from '@alertle/react';
 //
 import { useLoginMutation } from './urql';
-import { setStoredItem, StorageKey } from './utils/local-storage';
+import { setStoredItem, StorageKeys } from './utils/local-storage';
 import { formEntries } from './utils/common';
+import useAuthContext from './contexts/AuthContext';
 // Components
 import InputField from './components/InputField';
 
@@ -11,6 +12,7 @@ export default function Login() {
     const formRef = useRef(null);
     const { notifyError } = useAlert();
     const [, login] = useLoginMutation();
+    const { storeLocalAuth: storeAuth } = useAuthContext();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -34,7 +36,7 @@ export default function Login() {
                 notifyError({ message: err.message });
             }
         } else if (user) {
-            setStoredItem(StorageKey.AUTH, user.token);
+            storeAuth(user);
         }
     };
 

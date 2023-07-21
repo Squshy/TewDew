@@ -4,6 +4,7 @@ import { AlertProvider } from '@alertle/react';
 //
 import UrqlClientProvider from '../urql/client';
 import AlertContainer from '../components/Alert';
+import { AuthProvider } from '../contexts/AuthContext';
 
 type WrapperProps = {
     children?: ReactNode | ReactNode[];
@@ -25,13 +26,15 @@ export default function Root() {
             alertContainer={<AlertContainer />}
             defaultExpiresInMs={3500}
         >
-            <UrqlClientProvider>
-                <div className="flex w-full h-full">
-                    <Wrapper>
-                        <Outlet />
-                    </Wrapper>
-                </div>
-            </UrqlClientProvider>
+            <AuthProvider>
+                <UrqlClientProvider>
+                    <div className="flex w-full h-full">
+                        <Wrapper>
+                            <Outlet />
+                        </Wrapper>
+                    </div>
+                </UrqlClientProvider>
+            </AuthProvider>
         </AlertProvider>
     );
 }
