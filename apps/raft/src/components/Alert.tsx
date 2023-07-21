@@ -3,7 +3,14 @@ import { useAlertContainer, Alert } from '@alertle/react';
 
 const ANIMATION_DURATION_MS = 250;
 
-type NotificationProps = any;
+type ExpireAlertFn = ReturnType<typeof useAlertContainer>['expireAlert'];
+type UpdateAlertFn = ReturnType<typeof useAlertContainer>['updateAlert'];
+
+type NotificationProps = {
+    node: Alert;
+    expireNode: ExpireAlertFn;
+    updateNode: UpdateAlertFn;
+};
 
 function NotificationIcon({ node }: { node: Alert }) {
     if (node.type === 'success') {
@@ -146,8 +153,6 @@ function Notification({ node, expireNode, updateNode }: NotificationProps) {
 
 export default function AlertContainer() {
     const { alerts, expireAlert, updateAlert } = useAlertContainer();
-
-    console.log({ state: alerts });
 
     return (
         <div className="absolute right-0 z-50">
