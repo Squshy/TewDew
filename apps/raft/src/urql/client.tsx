@@ -20,7 +20,7 @@ const client = new Client({
                 addAuthToOperation(operation) {
                     // Accessing this on every request
                     // This could be improved
-                    const token = getStoredItem(StorageKeys.AUTH);
+                    const token = getStoredItem(StorageKeys.TOKEN);
 
                     if (!token) {
                         return operation;

@@ -9,7 +9,7 @@ import ErrorPage from './ErrorPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import LandingPage from './pages/LandingPage';
-import Home from './pages/Home';
+import Home, { HomeWrapper } from './pages/Home';
 
 const router = createBrowserRouter([
     {
@@ -31,11 +31,11 @@ const router = createBrowserRouter([
             },
             {
                 path: Routes.HOME,
-                element: <Home />,
+                element: <HomeWrapper />,
                 children: [
                     {
                         index: true,
-                        element: <div>hey beans</div>,
+                        element: <Home />,
                     },
                 ],
             },
