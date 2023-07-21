@@ -1,34 +1,35 @@
 import { useRef } from 'react';
-import { useAlert } from '@alertle/react';
+import { useNavigate } from 'react-router-dom';
 //
-import { useLoginMutation } from './urql';
-import { setStoredItem, StorageKeys } from './utils/local-storage';
-import { formEntries } from './utils/common';
-import useAuthContext from './contexts/AuthContext';
+import { useAlert } from '@alertle/react';
+import { useRegisterMutation } from '../urql';
+import Routes from '../routes';
 // Components
-import InputField from './components/InputField';
+import InputField from '../components/InputField';
+import useAuthContext from '../contexts/AuthContext';
+import { formEntries } from '../utils/common';
 
-export default function Login() {
+export default function Register() {
     const formRef = useRef(null);
+    const [, register] = useRegisterMutation();
     const { notifyError } = useAlert();
-    const [, login] = useLoginMutation();
-    const { storeLocalAuth: storeAuth } = useAuthContext();
+    const { storeLocalAuth } = useAuthContext();
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         const { username, password } = formEntries<{
             username: string;
             password: string;
         }>(e);
 
-        // TODO: Some fancy error stuff even though this won't hit due to
-        // HTML5 validation
         if (!username || !password) {
             return;
         }
 
-        const result = await login({ password, username });
-        const user = result.data?.login.user;
+        const result = await register({ username, password });
+        const user = result.data?.register.user;
         const errors = result.error?.graphQLErrors;
 
         if (errors) {
@@ -36,7 +37,8 @@ export default function Login() {
                 notifyError({ message: err.message });
             }
         } else if (user) {
-            storeAuth(user);
+            storeLocalAuth(user);
+            navigate(Routes.HOME);
         }
     };
 
@@ -49,7 +51,7 @@ export default function Login() {
             >
                 <div className="flex flex-col w-full space-y-6 max-w-xl">
                     <h2 className="text-3xl text-center font-bold tracking-tight text-gray-800">
-                        Login
+                        Register
                     </h2>
                     <InputField
                         label="Username"
@@ -72,7 +74,7 @@ export default function Login() {
                             type="submit"
                             className="w-full bg-indigo-600 p-2 rounded-md text-white text-sm font-semibold hover:bg-indigo-500 transition duration-250 ease-out"
                         >
-                            Sign in
+                            Register
                         </button>
                     </div>
                 </div>

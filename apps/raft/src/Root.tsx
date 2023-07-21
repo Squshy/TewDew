@@ -2,9 +2,9 @@ import type { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AlertProvider } from '@alertle/react';
 //
-import UrqlClientProvider from '../urql/client';
-import AlertContainer from '../components/Alert';
-import { AuthProvider } from '../contexts/AuthContext';
+import UrqlClientProvider from './urql/client';
+import AlertContainer from './components/Alert';
+import { AuthProvider } from './contexts/AuthContext';
 
 type WrapperProps = {
     children?: ReactNode | ReactNode[];

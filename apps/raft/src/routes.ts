@@ -4,6 +4,7 @@ const Routes = {
     ROOT: '/',
     REGISTER: '/register',
     LOGIN: '/login',
+    HOME: '/home',
 } as const;
 
 export default Routes;

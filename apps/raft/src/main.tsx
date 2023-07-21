@@ -2,13 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
-import Routes from './routes/routes';
+import Routes from './routes';
 // Components
-import Root from './routes/root';
+import Root from './Root';
 import ErrorPage from './ErrorPage';
-import Login from './Login';
-import Register from './Register';
-import LandingPage from './LandingPage';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import LandingPage from './pages/LandingPage';
+import Home from './pages/Home';
 
 const router = createBrowserRouter([
     {
@@ -27,6 +28,16 @@ const router = createBrowserRouter([
             {
                 path: Routes.REGISTER,
                 element: <Register />,
+            },
+            {
+                path: Routes.HOME,
+                element: <Home />,
+                children: [
+                    {
+                        index: true,
+                        element: <div>hey beans</div>,
+                    },
+                ],
             },
         ],
     },
