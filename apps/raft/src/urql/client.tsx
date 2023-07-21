@@ -1,25 +1,26 @@
-import { useContext, createContext, ReactNode } from 'react';
-import { createClient, fetchExchange } from '@urql/core';
+import type { ReactNode } from 'react';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { authExchange } from '@urql/exchange-auth';
+import { Client, fetchExchange, Provider } from 'urql';
 //
-import { getStoredItem, STORAGE_KEY } from '../utils/local-storage';
+import { getStoredItem, StorageKey } from '../utils/local-storage';
 
 const GRAPHQL_CODE = {
     FORBIDDEN: 'FORBIDDEN',
     UNAUTHORIZED: 'UNAUTHORIZED',
 } as const;
 
-const client = createClient({
+const client = new Client({
     url: 'http://localhost:4000/',
     exchanges: [
         cacheExchange(),
+        // eslint-disable-next-line @typescript-eslint/require-await
         authExchange(async (utils) => {
             return {
                 addAuthToOperation(operation) {
                     // Accessing this on every request
                     // This could be improved
-                    const token = getStoredItem(STORAGE_KEY.AUTH);
+                    const token = getStoredItem(StorageKey.AUTH);
 
                     if (!token) {
                         return operation;
@@ -46,30 +47,10 @@ const client = createClient({
     ],
 });
 
-const UrqlClientContext = createContext<ReturnType<typeof createClient> | null>(
-    null
-);
-
-type UrqlClientProviderProps = {
+export default function UrqlClientProvider({
+    children,
+}: {
     children: ReactNode | ReactNode[];
-};
-
-export function UrqlClientProvider({ children }: UrqlClientProviderProps) {
-    return (
-        <UrqlClientContext.Provider value={client}>
-            {children}
-        </UrqlClientContext.Provider>
-    );
-}
-
-export default function useUrqlClient() {
-    const client = useContext(UrqlClientContext);
-
-    if (!client) {
-        throw new Error(
-            '`useUrqlClient` can only be used within an `<UrqlClientProvider />` provider.'
-        );
-    }
-
-    return client;
+}) {
+    return <Provider value={client}>{children}</Provider>;
 }

@@ -2,8 +2,7 @@ import type { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AlertProvider } from '@alertle/react';
 //
-import { UrqlClientProvider } from '../urql';
-//
+import UrqlClientProvider from '../urql/client';
 import AlertContainer from '../components/Alert';
 
 type WrapperProps = {
@@ -22,7 +21,10 @@ function Wrapper(props: WrapperProps) {
 
 export default function Root() {
     return (
-        <AlertProvider alertContainer={<AlertContainer />}>
+        <AlertProvider
+            alertContainer={<AlertContainer />}
+            defaultExpiresInMs={3500}
+        >
             <UrqlClientProvider>
                 <div className="flex w-full h-full">
                     <Wrapper>

@@ -3,7 +3,7 @@ import { useRef } from 'react';
 //
 import { useAlert } from '@alertle/react';
 import { useRegisterMutation } from './urql';
-import { setStoredItem, STORAGE_KEY } from './utils/local-storage';
+import { setStoredItem, StorageKey } from './utils/local-storage';
 // Components
 import InputField from './components/InputField';
 
@@ -31,7 +31,7 @@ export default function Register() {
                 notifyError({ message: err.message });
             }
         } else if (user) {
-            setStoredItem(STORAGE_KEY.AUTH, user.token);
+            setStoredItem(StorageKey.AUTH, user.token);
         }
     };
 

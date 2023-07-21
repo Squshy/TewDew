@@ -2,20 +2,22 @@ import { useRef } from 'react';
 import { useAlert } from '@alertle/react';
 //
 import { useLoginMutation } from './urql';
+import { setStoredItem, StorageKey } from './utils/local-storage';
+import { formEntries } from './utils/common';
 // Components
 import InputField from './components/InputField';
-import { setStoredItem, STORAGE_KEY } from './utils/local-storage';
 
 export default function Login() {
+    const formRef = useRef(null);
     const { notifyError } = useAlert();
-    const usernameRef = useRef<HTMLInputElement>(null);
-    const passwordRef = useRef<HTMLInputElement>(null);
     const [, login] = useLoginMutation();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const username = usernameRef.current?.value;
-        const password = passwordRef.current?.value;
+        const { username, password } = formEntries<{
+            username: string;
+            password: string;
+        }>(e);
 
         // TODO: Some fancy error stuff even though this won't hit due to
         // HTML5 validation
@@ -25,20 +27,21 @@ export default function Login() {
 
         const result = await login({ password, username });
         const user = result.data?.login.user;
-        const userErrors = result.data?.login.userErrors;
+        const errors = result.error?.graphQLErrors;
 
-        if (userErrors) {
-            for (const err of userErrors) {
+        if (errors) {
+            for (const err of errors) {
                 notifyError({ message: err.message });
             }
         } else if (user) {
-            setStoredItem(STORAGE_KEY.AUTH, user.token);
+            setStoredItem(StorageKey.AUTH, user.token);
         }
     };
 
     return (
         <div className="flex flex-col w-full">
             <form
+                ref={formRef}
                 onSubmit={handleSubmit}
                 className="flex w-full justify-center"
             >
@@ -51,7 +54,7 @@ export default function Login() {
                         id="username"
                         placeholder="Username"
                         type="text"
-                        ref={usernameRef}
+                        name="username"
                         required
                     />
                     <InputField
@@ -59,7 +62,7 @@ export default function Login() {
                         id="password"
                         placeholder="Password"
                         type="password"
-                        ref={passwordRef}
+                        name="password"
                         required
                     />
                     <div>

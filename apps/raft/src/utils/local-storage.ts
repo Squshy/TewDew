@@ -1,8 +1,8 @@
 const KEY_PREFIX = 'tewdew:';
 
-type StorageKey = typeof STORAGE_KEY[keyof typeof STORAGE_KEY];
+type StorageKey = typeof StorageKey[keyof typeof StorageKey];
 
-export const STORAGE_KEY = {
+export const StorageKey = {
     AUTH: 'token',
 } as const;
 
