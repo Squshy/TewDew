@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useAlert } from '@alertle/react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 //
 import { useLoginMutation } from '../urql';
 import { formEntries } from '../utils/common';
@@ -80,6 +80,15 @@ export default function Login() {
                                 Sign in
                             </button>
                         </div>
+                        <p className="text-xs">
+                            Don&apos;t have an account? Sign up{' '}
+                            <Link
+                                to={Routes.REGISTER}
+                                className="text-indigo-600"
+                            >
+                                here
+                            </Link>
+                        </p>
                     </div>
                 </form>
             </div>
