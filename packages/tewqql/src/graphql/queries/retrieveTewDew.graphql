@@ -1,0 +1,5 @@
+query RetrieveTewDew($id: UUID!) {
+    retrieveTewDew(id: $id) {
+        ...SingleTewDew
+    }
+}
