@@ -71,6 +71,57 @@ RETURNING *;"#,
     Ok(tew_dew)
 }
 
+pub async fn retrieve(
+    pool: &PgPool,
+    user_id: &Uuid,
+    tew_dew_id: &Uuid,
+) -> ServiceResult<SlimTewDew> {
+    let tew_dew: SlimTewDew = sqlx::query_as!(
+        SlimTewDew,
+        r#"SELECT * FROM tewdews WHERE user_id = $1 AND id = $2"#,
+        user_id,
+        tew_dew_id
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|_| TewDewError::NotFound)?;
+
+    Ok(tew_dew)
+}
+
+pub async fn retrieve_with_tasks(
+    pool: &PgPool,
+    user_id: &Uuid,
+    tew_dew_id: &Uuid,
+) -> ServiceResult<TewDew> {
+    let tew_dew = sqlx::query!(
+        r#"
+SELECT tewdews.*,
+COALESCE(JSON_AGG(tasks) FILTER (WHERE tasks.id IS NOT NULL), '[]') AS "tasks!"
+FROM tewdews
+LEFT JOIN tasks ON tewdews.id = tasks.tewdew_id
+WHERE tewdews.id = $1 AND tewdews.user_id = $2
+GROUP BY tewdews.id;
+"#,
+        tew_dew_id,
+        user_id,
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|_| TewDewError::NotFound)?;
+
+    Ok(TewDew {
+        user_id: tew_dew.user_id,
+        id: tew_dew.id,
+        title: tew_dew.title,
+        tasks: serde_json::from_value(tew_dew.tasks)?,
+        completed: tew_dew.completed,
+        created_at: tew_dew.created_at,
+        updated_at: tew_dew.updated_at,
+        description: tew_dew.description,
+    })
+}
+
 pub async fn list(
     pool: &PgPool,
     user_id: &Uuid,
