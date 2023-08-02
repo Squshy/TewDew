@@ -103,7 +103,7 @@ function Notification({ node, expireNode, updateNode }: NotificationProps) {
 
     return (
         <div
-            className={`transition-all ease-out duration-[${ANIMATION_DURATION_MS}] rounded-md p-2 m-2 bg-slate-100
+            className={`transition-all ease-out duration-[${ANIMATION_DURATION_MS}] rounded-md p-3 m-2 bg-slate-100
              border-2 border-slate-200 max-w-2 ${
                  scale ? 'scale-100' : 'scale-0'
              } ${node.isDuplicate ? 'animate-wiggle' : ''}`}
@@ -155,7 +155,7 @@ export default function AlertContainer() {
     const { alerts, expireAlert, updateAlert } = useAlertContainer();
 
     return (
-        <div className="absolute right-0 z-50">
+        <div className="absolute right-0 bottom-0 z-50">
             {alerts.map((node) => (
                 <Notification
                     key={node.key}

@@ -4,12 +4,14 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
 import Routes from './routes';
 // Components
+import AuthPageWrapper from './components/AuthPageWrapper';
 import Root from './Root';
 import ErrorPage from './ErrorPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import LandingPage from './pages/LandingPage';
-import Home, { HomeWrapper } from './pages/Home';
+import Home from './pages/Home';
+import tewdewRouter from './pages/tewdew/router';
 
 const router = createBrowserRouter([
     {
@@ -31,7 +33,7 @@ const router = createBrowserRouter([
             },
             {
                 path: Routes.HOME,
-                element: <HomeWrapper />,
+                element: <AuthPageWrapper />,
                 children: [
                     {
                         index: true,
@@ -39,6 +41,7 @@ const router = createBrowserRouter([
                     },
                 ],
             },
+            tewdewRouter,
         ],
     },
 ]);

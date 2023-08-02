@@ -4,17 +4,27 @@ type InputFieldProps = React.HTMLProps<HTMLInputElement> & {
     label: string;
     id: string; // id is not required on base element, make it required
     error?: string | undefined;
+    hideLabel?: boolean;
 };
 
 const InputField = forwardRef(function (
-    { label, id, type, error, ...props }: InputFieldProps,
+    { label, id, type, error, hideLabel, ...props }: InputFieldProps,
     ref: ForwardedRef<HTMLInputElement>
 ) {
     return (
         <div>
-            <label htmlFor={id} className="sr-only">
-                {label}
-            </label>
+            {hideLabel ? (
+                <label htmlFor={id} className="sr-only">
+                    {label}
+                </label>
+            ) : (
+                <label
+                    htmlFor={id}
+                    className="block mb-2 text-md font-medium text-gray-900"
+                >
+                    {label}
+                </label>
+            )}
             <input
                 type={type}
                 id={id}

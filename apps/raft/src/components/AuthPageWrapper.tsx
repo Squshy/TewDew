@@ -5,12 +5,15 @@ import {
     useRef,
     ReactNode,
     SVGProps,
+    Dispatch,
+    SetStateAction,
 } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Outlet } from 'react-router-dom';
 import useAuthContext from '../contexts/AuthContext';
-import Routes, { Route } from '../routes';
+import Routes from '../routes';
 // Icons
 import PlusCircleIcon from './icons/outline/PlusCircle';
+import ListBulletIcon from './icons/outline/ListBullet';
 import HomeIcon from './icons/outline/Home';
 
 function UserMenu() {
@@ -96,16 +99,19 @@ function SideLink({
     linkTo,
     icon,
     title,
+    closeSidebar,
 }: {
-    linkTo: Route;
+    linkTo: string;
     icon: ((props?: SVGProps<SVGSVGElement>) => JSX.Element) | JSX.Element;
     title: string;
+    closeSidebar: () => void;
 }) {
     return (
         <li>
             <Link
                 to={linkTo}
                 className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100"
+                onClick={closeSidebar}
             >
                 {typeof icon === 'function' ? icon() : icon}
                 <span className="ml-3">{title}</span>
@@ -114,7 +120,17 @@ function SideLink({
     );
 }
 
-function Sidebar({ isOpen }: { isOpen: boolean }) {
+function Sidebar({
+    isOpen,
+    setIsOpen,
+}: {
+    isOpen: boolean;
+    setIsOpen: Dispatch<SetStateAction<boolean>>;
+}) {
+    function closeSidebar() {
+        setIsOpen(false);
+    }
+
     return (
         <div
             id="logo-sidebar"
@@ -131,11 +147,19 @@ function Sidebar({ isOpen }: { isOpen: boolean }) {
                         linkTo={Routes.HOME}
                         icon={HomeIcon}
                         title="Home"
+                        closeSidebar={closeSidebar}
                     />
                     <SideLink
-                        linkTo={Routes.HOME}
+                        linkTo={Routes.CREATE_TEW_DEW}
                         icon={PlusCircleIcon}
                         title="Create Tew Dew"
+                        closeSidebar={closeSidebar}
+                    />
+                    <SideLink
+                        linkTo={Routes.LIST_TEW_DEWS}
+                        icon={ListBulletIcon}
+                        title="List Tew Dews"
+                        closeSidebar={closeSidebar}
                     />
                 </ul>
             </div>
@@ -143,7 +167,7 @@ function Sidebar({ isOpen }: { isOpen: boolean }) {
     );
 }
 
-export default function NavWrapper({ children }: { children: ReactNode }) {
+function NavWrapper({ children }: { children: ReactNode }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
@@ -191,11 +215,35 @@ export default function NavWrapper({ children }: { children: ReactNode }) {
                 </div>
             </nav>
             <div className="flex w-full h-full">
-                <Sidebar isOpen={isSidebarOpen} />
+                <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
                 <div className="flex px-4 py-6 w-full h-full bg-gray-100">
                     {children}
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function AuthPageWrapper() {
+    const { state } = useAuthContext<false>();
+    const navigate = useNavigate();
+
+    // TODO: Handle cases with failed auth due to expired JWT (in urql maybe?)
+    useEffect(() => {
+        if (!state.user) {
+            navigate(Routes.LOGIN, { replace: true });
+        }
+    }, [state, navigate]);
+
+    if (!state.user) {
+        return null;
+    }
+
+    return (
+        <NavWrapper>
+            <div className="flex w-full h-full bg-white p-6 rounded-md">
+                <Outlet />
+            </div>
+        </NavWrapper>
     );
 }

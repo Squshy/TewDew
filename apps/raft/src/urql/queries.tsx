@@ -7,12 +7,12 @@ import {
     MeDocument,
     MeQuery,
     MeQueryVariables,
+    RetrieveTewDewDocument,
+    RetrieveTewDewQuery,
+    RetrieveTewDewQueryVariables,
 } from 'tewgql';
 
-type QueryVars<T extends AnyVariables> = Omit<
-    UseQueryArgs<T>,
-    'query' | 'variables'
->;
+type QueryVars<T extends AnyVariables> = Omit<UseQueryArgs<T>, 'query'>;
 
 export function useMeQuery(options: QueryVars<MeQueryVariables> = {}) {
     return useQuery<MeQuery, MeQueryVariables>({
@@ -26,6 +26,15 @@ export function useListTewDewsQuery(
 ) {
     return useQuery<ListTewDewsQuery, ListTewDewsQueryVariables>({
         query: ListTewDewsDocument,
+        ...options,
+    });
+}
+
+export function useTewDewQuery(
+    options: QueryVars<RetrieveTewDewQueryVariables>
+) {
+    return useQuery<RetrieveTewDewQuery, RetrieveTewDewQueryVariables>({
+        query: RetrieveTewDewDocument,
         ...options,
     });
 }

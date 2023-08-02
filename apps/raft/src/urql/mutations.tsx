@@ -1,5 +1,3 @@
-import { useCallback, useRef, useEffect, useState } from 'react';
-import { useAlert } from '@alertle/react';
 import { useMutation } from 'urql';
 //
 import {
@@ -12,6 +10,12 @@ import {
     CreateTewDewMutation,
     CreateTewDewMutationVariables,
     CreateTewDewDocument,
+    UpdateTaskMutation,
+    UpdateTaskMutationVariables,
+    UpdateTaskDocument,
+    CreateTaskMutation,
+    CreateTaskDocument,
+    CreateTaskMutationVariables,
 } from 'tewgql';
 
 export function useLoginMutation() {
@@ -27,5 +31,17 @@ export function useRegisterMutation() {
 export function useCreateTewDewMutation() {
     return useMutation<CreateTewDewMutation, CreateTewDewMutationVariables>(
         CreateTewDewDocument
+    );
+}
+
+export function useUpdateTaskMutation() {
+    return useMutation<UpdateTaskMutation, UpdateTaskMutationVariables>(
+        UpdateTaskDocument
+    );
+}
+
+export function useCreateTaskMutation() {
+    return useMutation<CreateTaskMutation, CreateTaskMutationVariables>(
+        CreateTaskDocument
     );
 }
