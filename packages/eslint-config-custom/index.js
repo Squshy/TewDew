@@ -12,6 +12,10 @@ const config = {
     plugins: ['@typescript-eslint', 'react', 'react-hooks'],
     rules: {
         'react/react-in-jsx-scope': 'off',
+        '@typescript-eslint/no-unused-vars': [
+            'error',
+            { argsIgnorePattern: '^_' },
+        ],
     },
     parserOptions: {
         ecmaVersion: 'latest',

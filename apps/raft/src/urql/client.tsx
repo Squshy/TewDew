@@ -1,19 +1,19 @@
 import type { ReactNode } from 'react';
-import { cacheExchange } from '@urql/exchange-graphcache';
 import { authExchange } from '@urql/exchange-auth';
 import { Client, fetchExchange, Provider } from 'urql';
 //
 import { getStoredItem, StorageKeys } from '../utils/local-storage';
+import cacheExchange from './cache-exchange';
 
 const GRAPHQL_CODE = {
     FORBIDDEN: 'FORBIDDEN',
     UNAUTHORIZED: 'UNAUTHORIZED',
 } as const;
+
 const client = new Client({
     url: 'http://localhost:4000/',
     exchanges: [
-        // TODO: Make cache-stuff
-        cacheExchange(),
+        cacheExchange,
         // eslint-disable-next-line @typescript-eslint/require-await
         authExchange(async (utils) => {
             return {
