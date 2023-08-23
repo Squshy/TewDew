@@ -1,0 +1,18 @@
+mutation CreateTewDew(
+    $title: String!
+    $completed: Boolean
+    $description: String
+) {
+    createTewDew(
+        title: $title
+        completed: $completed
+        description: $description
+    ) {
+        tewDew {
+            ...SingleSlimTewDew
+        }
+        tewDewErrors {
+            ...TewDewErrors
+        }
+    }
+}

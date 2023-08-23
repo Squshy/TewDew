@@ -1,4 +1,0 @@
-fragment NewTewDewErrorF on NewTewDewError {
-  title
-  description
-}

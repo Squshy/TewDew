@@ -1,4 +1,5 @@
 use super::{DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH};
+use crate::schema::models::FieldError;
 use crate::validation::check_length;
 
 #[derive(Debug, Clone, async_graphql::InputObject)]
@@ -11,43 +12,32 @@ pub struct NewTewDew {
     pub description: Option<String>,
 }
 
-#[derive(Debug, async_graphql::SimpleObject)]
-pub struct NewTewDewError {
-    title: Option<String>,
-    description: Option<String>,
-}
-
 impl NewTewDew {
     pub fn parse(
         title: String,
         completed: Option<bool>,
         description: Option<String>,
-    ) -> Result<NewTewDew, NewTewDewError> {
-        let mut error = NewTewDewError {
-            title: None,
-            description: None,
-        };
+    ) -> Result<NewTewDew, Vec<FieldError>> {
+        let mut tew_dew_errors: Vec<FieldError> = vec![];
 
-        match check_length(&title, TITLE_MAX_LENGTH) {
-            Ok(_) => (),
-            Err(e) => error.title = Some(format!("Title {}", e)),
+        if let Err(err) = check_length(&title, TITLE_MAX_LENGTH) {
+            tew_dew_errors.push(FieldError::new("title".into(), err));
         }
 
-        if let Some(description) = &description {
-            match check_length(&description, DESCRIPTION_MAX_LENGTH) {
-                Ok(_) => (),
-                Err(e) => error.description = Some(format!("Description {}", e)),
+        if let Some(desc) = &description {
+            if let Err(err) = check_length(&desc, DESCRIPTION_MAX_LENGTH) {
+                tew_dew_errors.push(FieldError::new("description".into(), err));
             }
         }
 
-        if error.title.is_none() && error.description.is_none() {
-            Ok(NewTewDew {
+        if tew_dew_errors.is_empty() {
+            return Ok(NewTewDew {
                 title,
                 completed,
                 description,
-            })
-        } else {
-            Err(error)
+            });
         }
+
+        Err(tew_dew_errors)
     }
 }

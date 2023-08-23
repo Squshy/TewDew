@@ -1,6 +1,6 @@
 use crate::errors::ServiceResult;
 use crate::user::errors::UserError;
-use crate::user::models::{NewUser, User};
+use crate::user::models::User;
 use crate::user::utils::{hash_password, verify_password};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -26,13 +26,13 @@ pub async fn login(pool: &PgPool, username: &String, password: &String) -> Servi
     Ok(user)
 }
 
-pub async fn create(pool: &PgPool, new_user: &NewUser) -> ServiceResult<User> {
-    let password_hash = hash_password(&new_user.password)?;
+pub async fn create(pool: &PgPool, username: &String, password: &String) -> ServiceResult<User> {
+    let password_hash = hash_password(password)?;
 
     let user = sqlx::query!(
         r#"INSERT INTO users (id, username, password) VALUES ($1, $2, $3) RETURNING *"#,
         &Uuid::new_v4(),
-        &new_user.username,
+        username,
         &password_hash
     )
     .fetch_one(pool)

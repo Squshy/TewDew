@@ -4,9 +4,9 @@ pub const TITLE_MAX_LENGTH: usize = 35;
 
 use async_graphql::SimpleObject;
 use chrono::{DateTime, Utc};
-pub use new_task::{NewTask, NewTaskError};
+pub use new_task::NewTask;
 use serde::{Deserialize, Serialize};
-pub use updated_task::{UpdateTaskError, UpdatedTask};
+pub use updated_task::UpdatedTask;
 use uuid::Uuid;
 
 #[derive(SimpleObject, Debug, Serialize, Deserialize)]

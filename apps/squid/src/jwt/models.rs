@@ -27,8 +27,3 @@ impl Claims {
         }
     }
 }
-
-#[derive(async_graphql::SimpleObject)]
-pub struct Token {
-    pub bearer: String,
-}

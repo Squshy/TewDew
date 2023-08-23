@@ -14,7 +14,7 @@ pub fn get_claims_from_context<'c>(ctx: &Context<'c>) -> ServiceResult<&'c Claim
     match claims {
         Ok(claims) => match claims {
             Some(claims) => Ok(claims),
-            None => Err(ServiceError::Unauthorized),
+            None => Err(ServiceError::Unauthorized.into()),
         },
         Err(e) => Err(e.clone()),
     }

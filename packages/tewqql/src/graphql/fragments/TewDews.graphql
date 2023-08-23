@@ -1,0 +1,12 @@
+fragment SingleTewDew on TewDew {
+    id
+    userId
+    completed
+    title
+    description
+    tasks {
+        ...SingleTask
+    }
+    createdAt
+    updatedAt
+}

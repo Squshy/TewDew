@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
@@ -28,15 +29,15 @@ fn claims_from_http_request(http_req: HttpRequest) -> ServiceResult<Option<Claim
             let token: Vec<&str> = header.split("Bearer ").collect();
 
             if token.is_empty() {
-                return Err(ServiceError::BadRequest(
-                    "Missing authorization header".to_string(),
-                ));
+                return Err(
+                    ServiceError::BadRequest("Missing authorization header".to_string()).into(),
+                );
             }
 
             if token.len() != 2 {
-                return Err(ServiceError::BadRequest(
-                    "Invalid authorization header".to_string(),
-                ));
+                return Err(
+                    ServiceError::BadRequest("Invalid authorization header".to_string()).into(),
+                );
             }
 
             let claims = decode_token(token[1])?;
@@ -71,7 +72,14 @@ async fn main() -> std::io::Result<()> {
     let schema = web::Data::new(create_schema(context));
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header()
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .app_data(schema.clone())
             .route("/", web::post().to(post_requests))
             .route("/", web::get().to(index_playground))

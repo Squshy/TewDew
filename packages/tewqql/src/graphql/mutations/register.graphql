@@ -1,0 +1,10 @@
+mutation Register($username: String!, $password: String!) {
+    register(username: $username, password: $password) {
+        user {
+            ...SingleAuthUser
+        }
+        userErrors {
+            ...UserErrors
+        }
+    }
+}

@@ -1,0 +1,9 @@
+fragment SingleTask on Task {
+    id
+    tewdewId
+    userId
+    title
+    completed
+    createdAt
+    updatedAt
+}

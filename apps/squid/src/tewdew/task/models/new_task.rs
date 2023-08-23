@@ -1,4 +1,5 @@
 use super::TITLE_MAX_LENGTH;
+use crate::schema::models::FieldError;
 use crate::validation::check_length;
 use uuid::Uuid;
 
@@ -12,32 +13,21 @@ pub struct NewTask {
     pub completed: Option<bool>,
 }
 
-#[derive(Debug, async_graphql::SimpleObject)]
-pub struct NewTaskError {
-    title: Option<String>,
-}
-
 impl NewTask {
     pub fn validate(
         tewdew_id: Uuid,
         title: String,
         completed: Option<bool>,
-    ) -> Result<NewTask, NewTaskError> {
-        let mut error = NewTaskError { title: None };
-
-        match check_length(&title, TITLE_MAX_LENGTH) {
-            Ok(_) => (),
-            Err(e) => error.title = Some(format!("Title {}", e)),
+    ) -> Result<NewTask, Vec<FieldError>> {
+        if let Err(err) = check_length(&title, TITLE_MAX_LENGTH) {
+            let errors = vec![FieldError::new("title".into(), err)];
+            return Err(errors);
         }
 
-        if error.title.is_none() {
-            Ok(NewTask {
-                tewdew_id,
-                title,
-                completed,
-            })
-        } else {
-            Err(error)
-        }
+        Ok(NewTask {
+            tewdew_id,
+            title,
+            completed,
+        })
     }
 }

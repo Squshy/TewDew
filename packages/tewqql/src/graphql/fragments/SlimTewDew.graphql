@@ -1,0 +1,9 @@
+fragment SingleSlimTewDew on SlimTewDew {
+    id
+    userId
+    completed
+    title
+    description
+    createdAt
+    updatedAt
+}

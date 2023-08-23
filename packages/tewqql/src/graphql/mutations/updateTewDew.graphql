@@ -1,0 +1,20 @@
+mutation UpdateTewDew(
+    $id: UUID!
+    $title: String
+    $completed: Boolean
+    $description: String
+) {
+    updateTewDew(
+        id: $id
+        title: $title
+        completed: $completed
+        description: $description
+    ) {
+        tewDew {
+            ...SingleSlimTewDew
+        }
+        tewDewErrors {
+            ...TewDewErrors
+        }
+    }
+}
