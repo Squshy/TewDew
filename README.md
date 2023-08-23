@@ -6,6 +6,8 @@
     A GraphQL To-Do tracker made with Rust, AsyncGraphQL, React and Urql.
 </p>
 
+![image](https://github.com/Squshy/TewDew/assets/36893334/df005e58-ff5d-4ecf-a2af-7da557a83be7)
+
 ## How to run it
 
 ### Running the Backend
