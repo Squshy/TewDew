@@ -16,6 +16,9 @@ import {
     CreateTaskMutation,
     CreateTaskDocument,
     CreateTaskMutationVariables,
+    UpdateTewDewMutation,
+    UpdateTewDewMutationVariables,
+    UpdateTewDewDocument,
 } from 'tewgql';
 
 export function useLoginMutation() {
@@ -37,6 +40,12 @@ export function useCreateTewDewMutation() {
 export function useUpdateTaskMutation() {
     return useMutation<UpdateTaskMutation, UpdateTaskMutationVariables>(
         UpdateTaskDocument
+    );
+}
+
+export function useUpdateTewDewMutation() {
+    return useMutation<UpdateTewDewMutation, UpdateTewDewMutationVariables>(
+        UpdateTewDewDocument
     );
 }
 

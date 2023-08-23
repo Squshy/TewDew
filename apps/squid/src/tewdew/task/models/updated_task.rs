@@ -17,14 +17,16 @@ impl UpdatedTask {
         title: Option<String>,
         completed: Option<bool>,
     ) -> ServiceResult<Result<UpdatedTask, Vec<FieldError>>> {
-        if title.is_none() && completed.is_none() {
+        if (title.is_none() || title.as_ref().unwrap().len() == 0) && completed.is_none() {
             return Err(TaskError::EmptyUpdateError.into());
         }
 
         if let Some(title) = &title {
-            if let Err(err) = check_length(&title, TITLE_MAX_LENGTH) {
-                let errors = vec![FieldError::new("title".into(), err)];
-                return Ok(Err(errors));
+            if title.len() != 0 {
+                if let Err(err) = check_length(&title, TITLE_MAX_LENGTH) {
+                    let errors = vec![FieldError::new("title".into(), err)];
+                    return Ok(Err(errors));
+                }
             }
         }
 

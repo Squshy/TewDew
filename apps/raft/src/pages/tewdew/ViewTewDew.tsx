@@ -7,6 +7,7 @@ import { useTewDewQuery } from '../../urql/queries';
 import {
     useCreateTaskMutation,
     useUpdateTaskMutation,
+    useUpdateTewDewMutation,
 } from '../../urql/mutations';
 import Routes from '../../routes';
 // Icons
@@ -16,28 +17,56 @@ import PlusCircleIcon from '../../components/icons/solid/PlusCircle';
 // Components
 import Checkbox from '../../components/Checkbox';
 import InputField from '../../components/InputField';
+import CheckCircleIcon from '../../components/icons/outline/CheckCircle';
 import { formEntries } from '../../utils/common';
 
 function TaskRow({ task }: { task: Task }) {
-    const { notifySuccess } = useAlert();
+    const { notifySuccess, notifyError } = useAlert();
     const [{ fetching }, updateTask] = useUpdateTaskMutation();
 
-    async function handleUpdate() {
-        const hehe = await updateTask({ taskId: task.id, completed });
-        notifySuccess({ message: 'Updated task' });
+    async function handleUpdate(e: FormEvent<HTMLFormElement>) {
+        // TODO: Do not allow updating if nothing has changed in the form
+        e.preventDefault();
+
+        const { completed, title } = formEntries<{
+            completed: boolean;
+            title: string;
+        }>(e);
+
+        const result = await updateTask({
+            taskId: task.id,
+            completed,
+            titleOpt: title,
+        });
+
+        const updatedTask = result.data?.updateTask.task;
+        const taskErrors = result.data?.updateTask.taskErrors;
+        const errors = result.error?.graphQLErrors;
+
+        if (errors) {
+            for (const err of errors) {
+                notifyError({ message: err.message });
+            }
+        } else if (taskErrors) {
+            for (const err of taskErrors) {
+                notifyError({ title: err.field, message: err.message });
+            }
+        } else if (updatedTask) {
+            notifySuccess({ message: 'Updated task' });
+        }
     }
 
     return (
-        <tr
-            className="hover:bg-gray-100 border-b cursor-pointer"
-            onClick={() => console.log('ha!')}
-        >
+        <tr className="hover:bg-gray-100 border-b cursor-pointer">
             <td className="px-6 py-3">
                 <InputField
                     defaultValue={task.title}
                     id="title"
                     label="Title"
                     name="title"
+                    form={`form-${task.id}`}
+                    disabled={fetching}
+                    hideLabel
                 />
             </td>
             <td className="px-6 py-3">
@@ -46,7 +75,15 @@ function TaskRow({ task }: { task: Task }) {
                     disabled={fetching}
                     name="completed"
                     id="completed"
+                    form={`form-${task.id}`}
                 />
+            </td>
+            <td className="px-6 py-3">
+                <form onSubmit={handleUpdate} id={`form-${task.id}`}>
+                    <button type="submit" disabled={fetching}>
+                        <CheckCircleIcon className="transition duration-50 ease-out text-green-600 cursor-pointer hover:scale-110 hover:text-green-500" />
+                    </button>
+                </form>
             </td>
         </tr>
     );
@@ -58,12 +95,11 @@ function AddTaskRow({ tewdewId }: { tewdewId: string }) {
 
     async function handleAddTask(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        const completed: boolean = (
-            e.currentTarget.completed as HTMLInputElement
-        ).checked;
-        const title: string = (
-            e.currentTarget.title as unknown as HTMLInputElement
-        ).value;
+
+        const { completed, title } = formEntries<{
+            completed: boolean;
+            title: string;
+        }>(e);
 
         const result = await addTask({ tewdewId, completed, title });
 
@@ -81,6 +117,12 @@ function AddTaskRow({ tewdewId }: { tewdewId: string }) {
             }
         } else if (task) {
             notifySuccess({ message: 'Created one!' });
+            // eslint-disable-next-line
+            // @ts-ignore
+            (e.target.title as HTMLInputElement).value = '';
+            // eslint-disable-next-line
+            // @ts-ignore
+            (e.target.completed as HTMLInputElement).checked = false;
         }
     }
 
@@ -92,21 +134,22 @@ function AddTaskRow({ tewdewId }: { tewdewId: string }) {
                     label="Title"
                     name="title"
                     placeholder="Title"
-                    form="form"
                     disabled={fetching}
+                    form={`form-${tewdewId}`}
                     hideLabel
                 />
             </td>
             <td className="px-6 py-3">
                 <Checkbox
+                    defaultChecked={false}
                     name="completed"
                     id="completed"
-                    form="form"
                     disabled={fetching}
+                    form={`form-${tewdewId}`}
                 />
             </td>
             <td className="px-6 py-3">
-                <form onSubmit={handleAddTask} id="form">
+                <form onSubmit={handleAddTask} id={`form-${tewdewId}`}>
                     <button type="submit" disabled={fetching}>
                         <PlusCircleIcon className="transition duration-50 ease-out text-green-600 cursor-pointer hover:scale-110 hover:text-green-500" />
                     </button>
@@ -131,10 +174,10 @@ function TasksTable({ tasks, tewdewId }: { tasks: Task[]; tewdewId: string }) {
                 </tr>
             </thead>
             <tbody>
+                <AddTaskRow tewdewId={tewdewId} />
                 {tasks.map((task) => (
                     <TaskRow key={task.id} task={task} />
                 ))}
-                <AddTaskRow tewdewId={tewdewId} />
             </tbody>
         </table>
     );
@@ -143,9 +186,45 @@ function TasksTable({ tasks, tewdewId }: { tasks: Task[]; tewdewId: string }) {
 export default function ViewTewDew() {
     const params = useParams() as { id: string };
     const navigate = useNavigate();
+    const [, updateTewDew] = useUpdateTewDewMutation();
 
-    const { notifyError } = useAlert();
+    const { notifyError, notifySuccess } = useAlert();
     const [{ data, error, fetching }] = useTewDewQuery({ variables: params });
+
+    async function handleUpdateTewDew(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        const id = data?.retrieveTewDew.id;
+
+        if (!id) {
+            return;
+        }
+
+        const completed = data.retrieveTewDew.completed;
+        const result = await updateTewDew({ id, completed: !completed });
+
+        const tewdew = result.data?.updateTewDew.tewDew;
+        const tewdewErrors = result.data?.updateTewDew.tewDewErrors;
+        const errors = result.error?.graphQLErrors;
+
+        if (errors) {
+            for (const err of errors) {
+                notifyError({ message: err.message });
+            }
+            // eslint-disable-next-line
+            // @ts-ignore
+            (e.target.completed as HTMLInputElement).checked = false;
+        } else if (tewdewErrors) {
+            for (const err of tewdewErrors) {
+                notifyError({ title: err.field, message: err.message });
+            }
+            // eslint-disable-next-line
+            // @ts-ignore
+            (e.target.completed as HTMLInputElement).checked = false;
+        } else if (tewdew) {
+            notifySuccess({ message: 'Updated' });
+        }
+    }
 
     if (fetching) {
         return <div>Loading...</div>;
@@ -175,14 +254,17 @@ export default function ViewTewDew() {
                     {tewdew.title}
                 </h1>
                 <div className="flex">
-                    {tewdew.completed ? (
-                        <CheckCircleSolidIcon className="text-green-600" />
-                    ) : (
-                        <CheckCircleOutlineIcon
-                            className="text-gray-300"
-                            disabled
-                        />
-                    )}
+                    <form onSubmit={handleUpdateTewDew}>
+                        {tewdew.completed ? (
+                            <button type="submit">
+                                <CheckCircleSolidIcon className="text-green-600" />
+                            </button>
+                        ) : (
+                            <button type="submit">
+                                <CheckCircleOutlineIcon className="text-gray-300" />
+                            </button>
+                        )}
+                    </form>
                 </div>
             </div>
             <hr className="w-full m-2" />

@@ -1,18 +1,17 @@
-import { cacheExchange, Cache, FieldInfo } from '@urql/exchange-graphcache';
-// import gql from 'graphql-tag';
+import { cacheExchange, Cache } from '@urql/exchange-graphcache';
+import gql from 'graphql-tag';
 import type {
     CreateTewDewMutation,
     CreateTewDewMutationVariables,
+    CreateTaskMutation,
+    CreateTaskMutationVariables,
+    UpdateTewDewMutation,
+    UpdateTewDewMutationVariables,
 } from 'tewgql';
 
-function invalidateAllTewDews(cache: Cache) {
-    const fieldInfos = cache
-        .inspectFields('Query')
-        .filter((info: FieldInfo) => info.fieldName === 'listTewDews');
-
-    for (const info of fieldInfos) {
-        cache.invalidate('Query', info.fieldKey);
-    }
+function invalidateCache(cache: Cache) {
+    cache.invalidate('Query');
+    cache.invalidate('Mutation');
 }
 
 function createTewDew(
@@ -25,17 +24,80 @@ function createTewDew(
         return;
     }
 
-    // When we create a new tewdew we will want to invalidate all of our
-    // currently stored tewdews
-    invalidateAllTewDews(cache);
+    const frag = gql`
+        fragment _ on SlimTewDew {
+            id
+            title
+            description
+            completed
+            userId
+            createdAt
+            updatedAt
+        }
+    `;
+
+    cache.writeFragment(frag, result.createTewDew.tewDew!);
+    cache.invalidate('query', 'listTewDews');
+}
+
+function createTask(
+    result: CreateTaskMutation,
+    args: CreateTaskMutationVariables,
+    cache: Cache
+) {
+    if (result.createTask.taskErrors) {
+        return;
+    }
+
+    const frag = gql`
+        fragment _ on Task {
+            id
+            title
+            completed
+            tewDewId
+            userId
+            createdAt
+            updatedAt
+        }
+    `;
+
+    cache.writeFragment(frag, result.createTask.task!);
+    cache.invalidate({ __typename: 'TewDew', id: args.tewdewId });
+}
+
+function updateTewDew(
+    result: UpdateTewDewMutation,
+    _args: UpdateTewDewMutationVariables,
+    cache: Cache
+) {
+    if (result.updateTewDew.tewDewErrors) {
+        return;
+    }
+
+    const frag = gql`
+        fragment _ on TewDew {
+            id
+            title
+            description
+            completed
+            userId
+            createdAt
+            updatedAt
+        }
+    `;
+
+    cache.writeFragment(frag, result.updateTewDew.tewDew!);
+    cache.invalidate({ __typename: 'TewDew', id: _args.id });
 }
 
 export default cacheExchange({
     updates: {
         Mutation: {
             createTewDew: createTewDew,
+            createTask: createTask,
+            updateTewDew: updateTewDew,
             login: (_, __, cache) => {
-                invalidateAllTewDews(cache);
+                invalidateCache(cache);
             },
         },
     },

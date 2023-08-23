@@ -6,5 +6,18 @@
 export function formEntries<T extends Record<string, unknown>>(
     e: React.FormEvent<HTMLFormElement>
 ): T {
-    return Object.fromEntries(new FormData(e.currentTarget)) as T;
+    const ok = (e.target || e.currentTarget) as HTMLFormElement;
+    const haha = Object.fromEntries(new FormData(ok)) as T;
+
+    for (const [key, value] of Object.entries(haha)) {
+        // eslint-disable-next-line
+        // @ts-ignore
+        if ((e.target[key] as HTMLInputElement).type === 'checkbox') {
+            // eslint-disable-next-line
+            // @ts-ignore
+            haha[key] = value === 'on';
+        }
+    }
+
+    return haha;
 }

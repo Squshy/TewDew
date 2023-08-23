@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import type { SlimTewDew } from 'tewgql';
+import { useAlert } from '@alertle/react';
+import type { SlimTewDew, TewDewErrorsFragment } from 'tewgql';
+//
 import { useCreateTewDewMutation } from '../../urql/mutations';
 import { formEntries } from '../../utils/common';
 import Routes from '../../routes';
 // Components
 import InputField from '../../components/InputField';
-import { useAlert } from '@alertle/react';
 
 type CreateTewDewFields = Required<Pick<SlimTewDew, 'description' | 'title'>>;
 
@@ -17,15 +18,19 @@ export default function CreateTewDew() {
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const data = formEntries<CreateTewDewFields>(e);
-        console.log({ data });
 
         const result = await createTewDew(data);
         const tewdew = result.data?.createTewDew.tewDew;
-        const errors = result.error?.graphQLErrors;
+        const errors =
+            result.data?.createTewDew.tewDewErrors ??
+            result.error?.graphQLErrors;
 
         if (errors) {
             for (const err of errors) {
-                notifyError({ message: err.message });
+                const title = (
+                    err as TewDewErrorsFragment
+                ).field?.toLocaleUpperCase();
+                notifyError({ message: err.message, title });
             }
         } else if (tewdew) {
             notifySuccess({ message: 'Created tew dew' });
